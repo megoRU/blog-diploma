@@ -1,15 +1,20 @@
 package main.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class Users {
 
     @Id
     @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "is_moderator", nullable = false)
@@ -29,18 +34,6 @@ public class Users {
 
     private String code;
 
+    @Column(columnDefinition = "TEXT")
     private String photo;
-
-    public Users() {
-    }
-
-    public Users(int isModerator, LocalDateTime regTime, String name, String email, String password, String code, String photo) {
-        this.isModerator = isModerator;
-        this.regTime = regTime;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.code = code;
-        this.photo = photo;
-    }
 }

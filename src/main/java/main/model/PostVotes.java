@@ -1,24 +1,28 @@
 package main.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
 @Entity
 @Table(name = "post_votes")
 public class PostVotes {
 
     @Id
     @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    //Тут связь должна быть
-    @Column(name = "user_id", nullable = false)
-    private int userId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private Users users;
 
-    //Тут связь должна быть
-    @Column(name = "post_id", nullable = false)
-    private int postId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id", referencedColumnName = "id", nullable = false)
+    private Posts posts;
 
     @Column(nullable = false)
     private LocalDateTime time;
@@ -26,12 +30,4 @@ public class PostVotes {
     @Column(nullable = false)
     private int value;
 
-    public PostVotes() {}
-
-    public PostVotes(int userId, int postId, LocalDateTime time, int value) {
-        this.userId = userId;
-        this.postId = postId;
-        this.time = time;
-        this.value = value;
-    }
 }
