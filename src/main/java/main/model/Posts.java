@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import main.model.enums.ModerationStatus;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -44,4 +45,12 @@ public class Posts {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
+    @OneToMany(mappedBy="posts")
+    private List<Tag2post> tags;
+
+    @OneToMany(mappedBy="posts")
+    private List<PostVotes> like;
+
+    @OneToMany(mappedBy="posts")
+    private List<PostComments> comments;
 }

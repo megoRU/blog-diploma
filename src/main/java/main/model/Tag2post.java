@@ -15,12 +15,11 @@ public class Tag2post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    //Связь
-    @Column(nullable = false)
-    private int postId;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id", nullable = false, referencedColumnName = "id")
+    private Posts posts;
 
-    //Связь
-    @Column(nullable = false)
-    private int tagId;
-
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tag_id", nullable = false, referencedColumnName = "id")
+    private Tags tags;
 }
