@@ -2,7 +2,6 @@ package main.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,7 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class Users {
+public class User {
 
     @Id
     @Column(nullable = false)
@@ -36,4 +35,8 @@ public class Users {
 
     @Column(columnDefinition = "TEXT")
     private String photo;
+
+    public Role getRoles() {
+        return isModerator == 1 ? Role.MODERATOR : Role.USER;
+    }
 }

@@ -31,7 +31,7 @@ public class Posts {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
-    private Users user;
+    private User user;
 
     @Column(nullable = false)
     private LocalDateTime time;

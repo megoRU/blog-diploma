@@ -1,11 +1,20 @@
 package main.controller;
 
+import main.api.responses.InitResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 public class DefaultController {
+    private final InitResponse initResponse;
+
+    public DefaultController(InitResponse initResponse) {
+        this.initResponse = initResponse;
+    }
 
     @RequestMapping("/")
     public String index() {
+        System.out.println(initResponse.getCopyright());
         return "index";
     }
+
+
 }
