@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:mysql://:3306/blog?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: blog
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+server:
+  port: ${PORT:8080}
+
+blog:
+  title: DevPub
+  subtitle: Рассказы разработчиков
+  phone: +7 800 55-35-35
+  email: blog@gmail.com
+  copyright: Иванов Иван
+  copyrightFrom: 2020

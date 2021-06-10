@@ -1,11 +1,14 @@
 package main.model;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "post_votes")
@@ -22,7 +25,7 @@ public class PostVotes {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id", referencedColumnName = "id", nullable = false)
-    private Posts posts;
+    private Post post;
 
     @Column(nullable = false)
     private LocalDateTime time;

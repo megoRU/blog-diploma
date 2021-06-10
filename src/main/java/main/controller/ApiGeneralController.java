@@ -25,5 +25,4 @@ public class ApiGeneralController {
         return initResponse;
     }
 
-
 }

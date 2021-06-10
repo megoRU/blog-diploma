@@ -1,15 +1,21 @@
 package main.service;
 
 import main.api.responses.SettingsResponse;
+import main.model.repositories.GlobalSettingsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SettingsService {
 
+    @Autowired
+    private GlobalSettingsRepository globalSettingsRepository;
+
     public SettingsResponse getGlobalSettings() {
         SettingsResponse settingsResponse = new SettingsResponse();
-        settingsResponse.setMultiuserMode(true);
-        settingsResponse.setStatisticIsPublic(true);
+        settingsResponse.setMultiuserMode(globalSettingsRepository.findAllGlobalSettings("MULTIUSER_MODE").getValue().equals("YES"));
+        settingsResponse.setPostPremoderation(globalSettingsRepository.findAllGlobalSettings("POST_PREMODERATION").getValue().equals("YES"));
+        settingsResponse.setStatisticIsPublic(globalSettingsRepository.findAllGlobalSettings("STATISTICS_IS_PUBLIC").getValue().equals("YES"));
         return settingsResponse;
     }
 }

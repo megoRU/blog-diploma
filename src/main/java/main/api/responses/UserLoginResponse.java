@@ -1,9 +1,16 @@
 package main.api.responses;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserLoginResponse {
+
     private long id;
     private String name;
     private String photo;
@@ -11,4 +18,5 @@ public class UserLoginResponse {
     private boolean moderation;
     private int moderationCount;
     private boolean settings;
+
 }
