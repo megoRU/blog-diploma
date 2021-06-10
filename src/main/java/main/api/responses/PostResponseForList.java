@@ -3,7 +3,7 @@ package main.api.responses;
 import lombok.Getter;
 import lombok.Setter;
 import main.model.PostVotes;
-import main.model.Post;
+import main.model.Posts;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class PostResponseForList {
     private long commentCount;
     private long viewCount;
 
-    public PostResponseForList(Post post) {
+    public PostResponseForList(Posts post) {
         this.id = post.getId();
         this.timestamp = post.getTime().toEpochSecond(ZoneOffset.ofHours(3));
         this.user = new UserPostResponse(post.getUser());
@@ -34,7 +34,7 @@ public class PostResponseForList {
         this.viewCount = post.getViewCount();
     }
 
-    private String setAnnounce(Post post) {
+    private String setAnnounce(Posts post) {
         String announce = post.getText()
                 .replaceAll("</div>", " ")
                 .replaceAll("<.*?>", "")
@@ -46,7 +46,7 @@ public class PostResponseForList {
         return announce;
     }
 
-    private long getLikeCount(Post post) {
+    private long getLikeCount(Posts post) {
         likeCount = 0;
 
         if (post.getLike() != null) {
@@ -61,7 +61,7 @@ public class PostResponseForList {
         return likeCount;
     }
 
-    private long getDislikeCount(Post post) {
+    private long getDislikeCount(Posts post) {
         dislikeCount = 0;
 
         if (post.getLike() != null) {
@@ -75,7 +75,7 @@ public class PostResponseForList {
         return dislikeCount;
     }
 
-    private long setCommentCount(Post post) {
+    private long setCommentCount(Posts post) {
 
         if (post.getComments() != null) {
             commentCount = post.getComments().size();

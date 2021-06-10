@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Posts {
 
     @Id
     @Column(nullable = false)
