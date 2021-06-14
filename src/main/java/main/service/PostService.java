@@ -3,7 +3,7 @@ package main.service;
 import main.api.responses.PostResponseForList;
 import main.api.responses.PostsResponse;
 import main.model.Posts;
-import main.model.repositories.PostRepository;
+import main.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

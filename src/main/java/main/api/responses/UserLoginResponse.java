@@ -1,13 +1,12 @@
 package main.api.responses;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import main.model.User;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class UserLoginResponse {
 
@@ -19,4 +18,15 @@ public class UserLoginResponse {
     private int moderationCount;
     private boolean settings;
 
+    public UserLoginResponse(User user) {
+        this.id = user.getId();
+        this.name = user.getName();
+        this.photo = user.getPhoto();
+        this.email = user.getEmail();
+        this.moderation = user.getIsModerator() == 1;
+        //Нужно прописать логику или выборку
+        this.moderationCount = 0;
+        //тут тоже
+        this.settings = true;
+    }
 }

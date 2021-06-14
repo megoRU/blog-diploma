@@ -24,5 +24,5 @@ public class Tag2post {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tag_id", nullable = false, referencedColumnName = "id")
-    private Tags tags;
+    private Tag tag;
 }
