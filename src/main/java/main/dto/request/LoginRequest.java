@@ -1,4 +1,4 @@
-package main.api.request;
+package main.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package main.service;
 
-import main.api.responses.UserLoginResponseList;
+import main.dto.responses.UserLoginResponseList;
 import main.model.User;
 import main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

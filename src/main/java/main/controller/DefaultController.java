@@ -1,6 +1,6 @@
 package main.controller;
 
-import main.api.responses.InitResponse;
+import main.dto.responses.InitResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 

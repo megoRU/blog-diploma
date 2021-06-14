@@ -1,9 +1,10 @@
 package main.controller;
 
-import main.api.request.LoginRequest;
-import main.api.responses.LoginResponse;
-import main.api.responses.UserLoginResponseList;
+import main.dto.request.LoginRequest;
+import main.dto.responses.LoginResponse;
+import main.dto.responses.UserLoginResponseList;
 import main.model.User;
+import main.repositories.UserRepository;
 import main.service.CheckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

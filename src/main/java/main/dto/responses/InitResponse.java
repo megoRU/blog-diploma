@@ -1,4 +1,4 @@
-package main.api.responses;
+package main.dto.responses;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

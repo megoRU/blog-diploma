@@ -1,7 +1,7 @@
 package main.controller;
 
-import main.api.responses.InitResponse;
-import main.api.responses.PostsResponse;
+import main.dto.responses.InitResponse;
+import main.dto.responses.PostsResponse;
 import main.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

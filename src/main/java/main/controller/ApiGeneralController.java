@@ -1,8 +1,8 @@
 package main.controller;
 
 import lombok.AllArgsConstructor;
-import main.api.responses.InitResponse;
-import main.api.responses.SettingsResponse;
+import main.dto.responses.InitResponse;
+import main.dto.responses.SettingsResponse;
 import main.service.SettingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
