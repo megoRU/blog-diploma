@@ -3,7 +3,7 @@ package main.dto.responses;
 import lombok.Getter;
 import lombok.Setter;
 import main.model.PostVotes;
-import main.model.Posts;
+import main.model.Post;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class PostResponseForList {
     private long commentCount;
     private long viewCount;
 
-    public PostResponseForList(Posts post) {
+    public PostResponseForList(Post post) {
         this.id = post.getId();
         this.timestamp = post.getTime().toEpochSecond(ZoneOffset.ofHours(3));
         this.user = new UserPostResponse(post.getUser());
@@ -34,7 +34,7 @@ public class PostResponseForList {
         this.viewCount = post.getViewCount();
     }
 
-    private String setAnnounce(Posts post) {
+    private String setAnnounce(Post post) {
         String announce = post.getText()
                 .replaceAll("</div>", " ")
                 .replaceAll("<.*?>", "")
@@ -46,7 +46,7 @@ public class PostResponseForList {
         return announce;
     }
 
-    private long getLikeCount(Posts post) {
+    private long getLikeCount(Post post) {
         likeCount = 0;
 
         if (post.getLike() != null) {
@@ -61,7 +61,7 @@ public class PostResponseForList {
         return likeCount;
     }
 
-    private long getDislikeCount(Posts post) {
+    private long getDislikeCount(Post post) {
         dislikeCount = 0;
 
         if (post.getLike() != null) {
@@ -75,10 +75,10 @@ public class PostResponseForList {
         return dislikeCount;
     }
 
-    private long setCommentCount(Posts post) {
+    private long setCommentCount(Post post) {
 
-        if (post.getComments() != null) {
-            commentCount = post.getComments().size();
+        if (post.getComment() != null) {
+            commentCount = post.getComment().size();
         } else {
             commentCount = 0;
         }

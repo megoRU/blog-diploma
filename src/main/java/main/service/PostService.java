@@ -2,7 +2,7 @@ package main.service;
 
 import main.dto.responses.PostResponseForList;
 import main.dto.responses.PostsResponse;
-import main.model.Posts;
+import main.model.Post;
 import main.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ public class PostService {
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Posts> postsPage;
+        Page<Post> postsPage;
 
         switch (mode) {
             case "popular":
@@ -41,9 +41,9 @@ public class PostService {
         return createPostsResponse(postsPage, postRepository.findAllPosts().size());
     }
 
-    private PostsResponse createPostsResponse(Page<Posts> pageOfTags, int size){
+    private PostsResponse createPostsResponse(Page<Post> pageOfTags, int size){
         List<PostResponseForList> postResponseList = new ArrayList<>();
-        for (Posts p : pageOfTags) {
+        for (Post p : pageOfTags) {
             postResponseList.add(new PostResponseForList(p));
         }
 

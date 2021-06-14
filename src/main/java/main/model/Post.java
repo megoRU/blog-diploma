@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Posts {
+public class Post {
 
     @Id
     @Column(nullable = false)
@@ -47,12 +47,12 @@ public class Posts {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
-    @OneToMany(mappedBy="posts")
-    private List<Tag2post> tags;
+    @OneToMany(mappedBy="post")
+    private List<Tags2Post> tag;
 
-    @OneToMany(mappedBy="posts")
+    @OneToMany(mappedBy="post")
     private List<PostVotes> like;
 
-    @OneToMany(mappedBy="posts")
-    private List<PostComments> comments;
+    @OneToMany(mappedBy="post")
+    private List<PostComments> comment;
 }
