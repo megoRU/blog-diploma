@@ -1,9 +1,11 @@
-package main.api.responses;
+package main.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class LoginResponse {
 
     private boolean result;

@@ -1,14 +1,17 @@
 package main.model;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "tags")
-public class Tags {
+public class Tag {
 
     @Id
     @Column(nullable = false)

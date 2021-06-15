@@ -53,7 +53,7 @@ create table posts
     moderation_status varchar(255) not null,
     moderator_id      integer      not null,
     text              TEXT         not null,
-    time              datetime(6) not null,
+    time              DATETIME     not null,
     title             varchar(255) not null,
     view_count        integer      not null,
     user_id           integer      not null,

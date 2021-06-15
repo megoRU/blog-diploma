@@ -16,4 +16,24 @@ INSERT INTO posts (time,
                    view_count,
                    title,
                    text)
+VALUES ('2021-06-06 15:27:00', '1', 'ACCEPTED', '2', '1', '30', 'New post', 'text here');
+
+INSERT INTO posts (time,
+                   is_active,
+                   moderation_status,
+                   moderator_id,
+                   user_id,
+                   view_count,
+                   title,
+                   text)
 VALUES ('2021-06-03 15:12:00', '1', 'NEW', '2', '1', '0', 'Test', 'new new new');
+
+INSERT INTO posts (time,
+                   is_active,
+                   moderation_status,
+                   moderator_id,
+                   user_id,
+                   view_count,
+                   title,
+                   text)
+VALUES ('2021-06-15 11:01:00', '1', 'ACCEPTED', '2', '1', '15', 'Как я провёл лето', 'Этим летом было всё шикарно!');
