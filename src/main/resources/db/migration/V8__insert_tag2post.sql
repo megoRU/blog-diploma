@@ -12,3 +12,8 @@ INSERT INTO tag2post (id,
                       post_id,
                       tag_id)
 VALUES (3, 3, 2);
+
+INSERT INTO tag2post (id,
+                      post_id,
+                      tag_id)
+VALUES (4, 4, 2);
