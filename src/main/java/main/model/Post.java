@@ -47,12 +47,12 @@ public class Post {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
-    @OneToMany(mappedBy="post")
+    @OneToMany(mappedBy = "post")
     private List<Tags2Post> tag;
 
-    @OneToMany(mappedBy="post")
-    private List<PostVotes> like;
+    @OneToMany(mappedBy = "post")
+    private List<PostVote> like;
 
-    @OneToMany(mappedBy="post")
-    private List<PostComments> comment;
+    @OneToMany(mappedBy = "post")
+    private List<PostComment> comment;
 }

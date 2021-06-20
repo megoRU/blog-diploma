@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "post_votes")
-public class PostVotes {
+public class PostVote {
 
     @Id
     @Column(nullable = false)

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "post_comments")
-public class PostComments {
+public class PostComment {
 
     @Id
     @Column(nullable = false)
