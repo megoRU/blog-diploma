@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -25,4 +26,8 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
 
     @Query(value = "SELECT * FROM posts p WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND `time` < NOW() ORDER BY (SELECT count(*) FROM post_votes pv WHERE pv.post_id = p.id) DESC", nativeQuery = true)
     Page<Post> findAllPostsByVotesDesc(Pageable pageable);
+
+    @Query(value = "SELECT * FROM posts WHERE is_active = TRUE AND moderation_status = 'ACCEPTED' AND text LIKE %:query% AND `time` < NOW() ORDER BY time DESC", nativeQuery = true)
+    Page<Post> findAllPostsByName(@Param("query") String query, Pageable pageable);
+
 }

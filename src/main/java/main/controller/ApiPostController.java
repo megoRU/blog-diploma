@@ -35,4 +35,13 @@ public class ApiPostController {
     private ResponseEntity<TagsResponseList> tag(@RequestParam(required = false) String name) {
         return ResponseEntity.ok(tagService.getTags(name));
     }
+
+    @GetMapping("/api/post/search")
+    private ResponseEntity<PostsResponse> getPostByName(
+            @RequestParam(required = false, defaultValue = "0") int offset,
+            @RequestParam(required = false, defaultValue = "10") int limit,
+            @RequestParam(required = false, defaultValue = "") String query) {
+        return ResponseEntity.ok(postService.getPostsSearch(offset, limit, query));
+    }
+
 }

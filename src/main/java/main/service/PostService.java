@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,20 +43,34 @@ public class PostService {
                 break;
         }
 
-        return createPostsResponse(postsPage, postRepository.findAllPosts().size());
+        return getPosts(postsPage, postRepository.findAllPosts().size());
     }
 
-    private PostsResponse createPostsResponse(Page<Post> pageOfTags, int size){
+    private PostsResponse getPosts(Page<Post> postsPages, int size) {
         List<PostResponseForList> postResponseList = new ArrayList<>();
-        for (Post p : pageOfTags) {
+        for (Post p : postsPages) {
             postResponseList.add(new PostResponseForList(p));
         }
 
-        PostsResponse postsResponse = new PostsResponse();
-        postsResponse.setPosts(postResponseList);
-        postsResponse.setCount(size);
+        return new PostsResponse(size, postResponseList);
+    }
 
-        return postsResponse;
+    public PostsResponse getPostsSearch(int offset, int limit, String query) {
+        if (query.trim().equals("")) {
+            Pageable pageable = PageRequest.of(offset / limit, limit);
+            Page<Post> postsPage = postRepository.findAllPostsByTimeDesc(pageable);
+            return getPosts(postsPage, postRepository.findAllPosts().size());
+        }
+
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Page<Post> postsPage = postRepository.findAllPostsByName(query, pageable);
+        List<PostResponseForList> postResponseList = new ArrayList<>();
+
+        for (Post p : postsPage) {
+            postResponseList.add(new PostResponseForList(p));
+        }
+
+        return new PostsResponse(postsPage.getTotalPages(), postResponseList);
     }
 
 }
