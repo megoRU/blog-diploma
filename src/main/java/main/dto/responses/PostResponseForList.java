@@ -2,7 +2,7 @@ package main.dto.responses;
 
 import lombok.Getter;
 import lombok.Setter;
-import main.model.PostVotes;
+import main.model.PostVote;
 import main.model.Post;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -50,8 +50,8 @@ public class PostResponseForList {
         likeCount = 0;
 
         if (post.getLike() != null) {
-            List<PostVotes> like = new ArrayList<>(post.getLike());
-            for (PostVotes l : like) {
+            List<PostVote> like = new ArrayList<>(post.getLike());
+            for (PostVote l : like) {
                 if (l.getValue() == 1) {
                     likeCount++;
                 }
@@ -65,8 +65,8 @@ public class PostResponseForList {
         dislikeCount = 0;
 
         if (post.getLike() != null) {
-            List<PostVotes> like = new ArrayList<>(post.getLike());
-            for (PostVotes l : like) {
+            List<PostVote> like = new ArrayList<>(post.getLike());
+            for (PostVote l : like) {
                 if (l.getValue() == -1) {
                     dislikeCount++;
                 }
