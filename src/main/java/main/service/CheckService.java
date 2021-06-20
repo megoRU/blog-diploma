@@ -5,15 +5,14 @@ import main.model.User;
 import main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
 public class CheckService {
 
-    @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
     public CheckService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }

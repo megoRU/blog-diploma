@@ -17,10 +17,7 @@ import java.util.Optional;
 @RestController
 public class ApiAuthController {
 
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final CheckService checkService;
 
     @Autowired

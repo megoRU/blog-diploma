@@ -15,8 +15,12 @@ import java.util.List;
 @Service
 public class PostService {
 
+    private final PostRepository postRepository;
+
     @Autowired
-    private PostRepository postRepository;
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
