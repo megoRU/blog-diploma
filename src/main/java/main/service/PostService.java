@@ -17,6 +17,9 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private static final String dateStart = " 00:00:00";
+    private static final String dateEnd = " 23:59:59";
+    private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
 
     @Autowired
     public PostService(PostRepository postRepository) {
@@ -71,6 +74,20 @@ public class PostService {
         }
 
         return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+    }
+
+    public PostsResponse getPostsByDate(int offset, int limit, String date) {
+        if (date.matches(dateRegex)) {
+            Pageable pageable = PageRequest.of(offset / limit, limit);
+            Page<Post> postsPage = postRepository.findAllPostsByDate(date + dateStart, date + dateEnd, pageable);
+            List<PostResponseForList> postResponseList = new ArrayList<>();
+
+            for (Post p : postsPage) {
+                postResponseList.add(new PostResponseForList(p));
+            }
+            return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+        }
+        return new PostsResponse(0, new ArrayList<>());
     }
 
 }

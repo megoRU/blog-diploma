@@ -30,4 +30,9 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(value = "SELECT * FROM posts WHERE is_active = TRUE AND moderation_status = 'ACCEPTED' AND text LIKE %:query% AND `time` < NOW() ORDER BY time DESC", nativeQuery = true)
     Page<Post> findAllPostsByName(@Param("query") String query, Pageable pageable);
 
+    @Query(value = "SELECT * FROM posts WHERE is_active = true AND moderation_status = 'ACCEPTED' AND `time` BETWEEN :dateFirst AND :dateSecond ORDER BY time", nativeQuery = true)
+    Page<Post> findAllPostsByDate(@Param("dateFirst") String dateFirst, @Param("dateSecond") String dateSecond, Pageable pageable);
+
+
+
 }

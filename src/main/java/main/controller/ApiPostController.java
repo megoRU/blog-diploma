@@ -44,4 +44,12 @@ public class ApiPostController {
         return ResponseEntity.ok(postService.getPostsSearch(offset, limit, query));
     }
 
+    @GetMapping("/api/post/byDate")
+    private ResponseEntity<PostsResponse> getPostByDate(
+            @RequestParam(required = false, defaultValue = "0") int offset,
+            @RequestParam(required = false, defaultValue = "10") int limit,
+            @RequestParam(required = false, defaultValue = "") String date) {
+        return ResponseEntity.ok(postService.getPostsByDate(offset, limit, date));
+    }
+
 }
