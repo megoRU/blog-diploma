@@ -1,15 +1,16 @@
 package main.service;
 
-import main.dto.responses.PostResponseForList;
-import main.dto.responses.PostsResponse;
+import main.dto.responses.*;
 import main.model.Post;
+import main.model.PostComment;
+import main.repositories.CommentsRepository;
 import main.repositories.PostRepository;
+import main.repositories.TagsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +18,17 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final TagsRepository tagsRepository;
+    private final CommentsRepository commentsRepository;
     private static final String dateStart = " 00:00:00";
     private static final String dateEnd = " 23:59:59";
     private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
 
     @Autowired
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, TagsRepository tagsRepository, CommentsRepository commentsRepository) {
         this.postRepository = postRepository;
+        this.tagsRepository = tagsRepository;
+        this.commentsRepository = commentsRepository;
     }
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
@@ -100,6 +105,18 @@ public class PostService {
             return new PostsResponse(postsPage.getTotalPages(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
+    }
+
+    //TODO: Переписать когда будет Spring Security
+    public PostResponseForList getPostsById(Integer id) {
+        List<PostComment> commentsList = commentsRepository.findComments(id);
+        List<String> tagList = tagsRepository.getTagsByPost(id);
+        List<PostCommentsResponse> commentsResponseList = new ArrayList<>();
+        for (PostComment c : commentsList) {
+            commentsResponseList.add(new PostCommentsResponse(c));
+        }
+        Post post = postRepository.findPostById(id);
+        return new PostResponseForList(post, commentsResponseList, tagList);
     }
 
 }
