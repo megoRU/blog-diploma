@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository
@@ -33,6 +34,11 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(value = "SELECT * FROM posts WHERE is_active = true AND moderation_status = 'ACCEPTED' AND `time` BETWEEN :dateFirst AND :dateSecond ORDER BY time", nativeQuery = true)
     Page<Post> findAllPostsByDate(@Param("dateFirst") String dateFirst, @Param("dateSecond") String dateSecond, Pageable pageable);
 
-
+    @Query(value = "SELECT DISTINCT blog.posts.id, is_active, moderation_status, moderator_id, text, time, title, view_count, user_id " +
+            "FROM blog.posts " +
+            "JOIN blog.tag2post t2p on t2p.post_id = blog.posts.id " +
+            "JOIN blog.tags t on t2p.tag_id = t.id " +
+            "WHERE is_active = true AND moderation_status = 'ACCEPTED' AND t.name = :tag", nativeQuery = true)
+    Page<Post> findAllPostsByTag(@Param("tag") String tag, Pageable pageable);
 
 }

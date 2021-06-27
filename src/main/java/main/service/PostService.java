@@ -54,7 +54,6 @@ public class PostService {
         for (Post p : postsPages) {
             postResponseList.add(new PostResponseForList(p));
         }
-
         return new PostsResponse(size, postResponseList);
     }
 
@@ -72,7 +71,6 @@ public class PostService {
         for (Post p : postsPage) {
             postResponseList.add(new PostResponseForList(p));
         }
-
         return new PostsResponse(postsPage.getTotalPages(), postResponseList);
     }
 
@@ -80,6 +78,20 @@ public class PostService {
         if (date.matches(dateRegex)) {
             Pageable pageable = PageRequest.of(offset / limit, limit);
             Page<Post> postsPage = postRepository.findAllPostsByDate(date + dateStart, date + dateEnd, pageable);
+            List<PostResponseForList> postResponseList = new ArrayList<>();
+
+            for (Post p : postsPage) {
+                postResponseList.add(new PostResponseForList(p));
+            }
+            return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+        }
+        return new PostsResponse(0, new ArrayList<>());
+    }
+
+    public PostsResponse getPostsByTag(int offset, int limit, String tag) {
+        if (!tag.equals("")) {
+            Pageable pageable = PageRequest.of(offset / limit, limit);
+            Page<Post> postsPage = postRepository.findAllPostsByTag(tag, pageable);
             List<PostResponseForList> postResponseList = new ArrayList<>();
 
             for (Post p : postsPage) {

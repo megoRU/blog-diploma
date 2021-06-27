@@ -37,7 +37,7 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/search")
-    private ResponseEntity<PostsResponse> getPostByName(
+    private ResponseEntity<PostsResponse> getPostsByName(
             @RequestParam(required = false, defaultValue = "0") int offset,
             @RequestParam(required = false, defaultValue = "10") int limit,
             @RequestParam(required = false, defaultValue = "") String query) {
@@ -45,11 +45,21 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/byDate")
-    private ResponseEntity<PostsResponse> getPostByDate(
+    private ResponseEntity<PostsResponse> getPostsByDate(
             @RequestParam(required = false, defaultValue = "0") int offset,
             @RequestParam(required = false, defaultValue = "10") int limit,
             @RequestParam(required = false, defaultValue = "") String date) {
         return ResponseEntity.ok(postService.getPostsByDate(offset, limit, date));
     }
+
+    @GetMapping("/api/post/byTag")
+    private ResponseEntity<PostsResponse> getPostsByTag(
+            @RequestParam(required = false, defaultValue = "0") int offset,
+            @RequestParam(required = false, defaultValue = "10") int limit,
+            @RequestParam(required = false, defaultValue = "") String tag) {
+        return ResponseEntity.ok(postService.getPostsByTag(offset, limit, tag));
+    }
+
+
 
 }
