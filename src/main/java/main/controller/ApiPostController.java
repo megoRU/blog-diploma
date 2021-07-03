@@ -64,10 +64,8 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/{ID}")
-    private ResponseEntity<PostResponseForList> getPostsById(@PathVariable int ID) {
-        PostResponseForList postsResponse = postService.getPostsById(ID);
-        if (postsResponse == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        return ResponseEntity.ok(postsResponse);
+    private ResponseEntity<?> getPostsById(@PathVariable int ID) {
+        return postService.getPostsById(ID);
     }
 
 

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,15 +110,19 @@ public class PostService {
     }
 
     //TODO: Переписать когда будет Spring Security
-    public PostResponseForList getPostsById(Integer id) {
+    public ResponseEntity<?> getPostsById(Integer id) {
+        Post post = postRepository.findPostById(id);
+        if (post == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         List<PostComment> commentsList = commentsRepository.findComments(id);
         List<String> tagList = tagsRepository.getTagsByPost(id);
         List<PostCommentsResponse> commentsResponseList = new ArrayList<>();
         for (PostComment c : commentsList) {
             commentsResponseList.add(new PostCommentsResponse(c));
         }
-        Post post = postRepository.findPostById(id);
-        return new PostResponseForList(post, commentsResponseList, tagList);
+        return new ResponseEntity<>(new PostResponseForList(post, commentsResponseList, tagList), HttpStatus.OK);
     }
 
 }
