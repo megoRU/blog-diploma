@@ -1,32 +1,40 @@
 package main.controller;
 
 import main.dto.request.LoginRequest;
+import main.dto.request.RegistrationRequest;
 import main.dto.responses.LoginResponse;
+import main.dto.responses.RegistrationResponse;
 import main.dto.responses.UserLoginResponseList;
 import main.model.User;
 import main.repositories.UserRepository;
+import main.service.CaptchaService;
 import main.service.CheckService;
+import main.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
 public class ApiAuthController {
 
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final CheckService checkService;
+    private final CaptchaService captchaService;
+    private final RegistrationService registrationService;
+
 
     @Autowired
-    public ApiAuthController(UserRepository userRepository, CheckService checkService) {
+    public ApiAuthController(UserRepository userRepository, CheckService checkService, CaptchaService captchaService, RegistrationService registrationService) {
         this.userRepository = userRepository;
         this.checkService = checkService;
+        this.captchaService = captchaService;
+        this.registrationService = registrationService;
     }
 
     @GetMapping("/api/auth/check")
@@ -51,6 +59,16 @@ public class ApiAuthController {
         System.out.println(userRepository.findByEmail(loginRequest.getEmail()));
 
         return ResponseEntity.ok(new LoginResponse());
+    }
+
+    @GetMapping(value = "/api/auth/captcha")
+    private ResponseEntity<?> captcha() throws IOException {
+        return captchaService.getCaptcha();
+    }
+
+    @PostMapping(value = "/api/auth/register")
+    private ResponseEntity<RegistrationResponse> registration(@RequestBody RegistrationRequest registrationRequest) {
+        return ResponseEntity.ok(registrationService.registration(registrationRequest));
     }
 
 }

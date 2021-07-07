@@ -6,15 +6,16 @@ import main.dto.responses.TagsResponseList;
 import main.repositories.TagsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class TagService {
 
-    @Autowired
     private final TagsRepository tagsRepository;
 
+    @Autowired
     public TagService(TagsRepository tagsRepository) {
         this.tagsRepository = tagsRepository;
     }

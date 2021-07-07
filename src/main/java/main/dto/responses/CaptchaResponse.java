@@ -3,13 +3,12 @@ package main.dto.responses;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
 
 @Setter
 @Getter
 @AllArgsConstructor
-public class PostsResponse {
+public class CaptchaResponse {
 
-    private int count;
-    private List<PostResponseForList> posts;
+    private String secret;
+    private String image;
 }

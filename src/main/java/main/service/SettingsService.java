@@ -8,8 +8,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SettingsService {
 
+    private final GlobalSettingsRepository globalSettingsRepository;
+
     @Autowired
-    private GlobalSettingsRepository globalSettingsRepository;
+    public SettingsService(GlobalSettingsRepository globalSettingsRepository) {
+        this.globalSettingsRepository = globalSettingsRepository;
+    }
 
     public SettingsResponse getGlobalSettings() {
         SettingsResponse settingsResponse = new SettingsResponse();
