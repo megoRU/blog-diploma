@@ -3,6 +3,7 @@ package main.dto.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import main.model.GlobalSettings;
 
 @Getter
 @Setter
@@ -13,4 +14,10 @@ public class SettingsResponse {
     private boolean postPremoderation;
     @JsonProperty("STATISTICS_IS_PUBLIC")
     private boolean statisticIsPublic;
+
+    public SettingsResponse(boolean multiuserMode, boolean postPremoderation, boolean statisticIsPublic) {
+        this.multiuserMode = multiuserMode;
+        this.postPremoderation = postPremoderation;
+        this.statisticIsPublic = statisticIsPublic;
+    }
 }

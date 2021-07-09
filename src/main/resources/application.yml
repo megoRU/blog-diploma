@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     show-sql: false
 
 server:
@@ -22,4 +22,4 @@ blog:
   phone: +7 800 55-35-35
   email: blog@gmail.com
   copyright: Иванов Иван
-  copyrightFrom: 2020
+  copyrightFrom: 2021

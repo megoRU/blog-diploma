@@ -11,25 +11,25 @@ import java.util.List;
 @Repository
 public interface TagsRepository extends CrudRepository<Tag, Integer> {
 
-    @Query(nativeQuery = true, value = "SELECT t.name as name, COUNT(t.id) as count " +
-    "FROM tags t " +
-    "JOIN tag2post tp ON tp.tag_id = t.id " +
-    "JOIN posts p on p.id = tp.post_id " +
-    "WHERE p.is_active = 1 AND p.moderation_status = 'ACCEPTED' AND p.time < NOW() AND t.name = (:name) GROUP BY tp.tag_id ORDER BY count DESC")
+    @Query(value = "SELECT t.name as name, COUNT(t.id) as count " +
+    "FROM Tag t " +
+    "JOIN Tags2Post tp ON tp.tag.id = t.id " +
+    "JOIN Post p on p.id = tp.post.id " +
+    "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_DATE AND t.name = (:name) GROUP BY tp.tag.id ORDER BY count(t.id) DESC")
     List<TagsResponseImpl> getTagByName(@Param("name") String name);
 
 
-    @Query(nativeQuery = true, value = "SELECT t.name as name, COUNT(t.id) as count " +
-            "FROM tags t " +
-            "JOIN tag2post tp ON tp.tag_id = t.id " +
-            "JOIN posts p on p.id = tp.post_id " +
-            "WHERE p.is_active = 1 AND p.moderation_status = 'ACCEPTED' AND p.time < NOW() GROUP BY tp.tag_id ORDER BY count DESC")
+    @Query(value = "SELECT t.name as name, COUNT(t.id) as count " +
+            "FROM Tag t " +
+            "JOIN Tags2Post tp ON tp.tag.id = t.id " +
+            "JOIN Post p on p.id = tp.post.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_DATE GROUP BY tp.tag.id ORDER BY count(t.id) DESC")
     List<TagsResponseImpl> getRecentTags();
 
-    @Query(nativeQuery = true, value = "SELECT t.name " +
-            "FROM tags t " +
-            "JOIN tag2post tp ON tp.tag_id = t.id " +
-            "WHERE tp.post_id = :id")
+    @Query(value = "SELECT t.name " +
+            "FROM Tag t " +
+            "JOIN Tags2Post tp ON tp.tag.id = t.id " +
+            "WHERE tp.post.id = :id")
     List<String> getTagsByPost(@Param("id") Integer id);
 
 }

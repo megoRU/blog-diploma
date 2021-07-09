@@ -3,7 +3,7 @@ package main.dto.responses;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import main.dto.Enums.RegistrationErrors;
+import main.dto.enums.RegistrationErrors;
 
 import java.util.Map;
 

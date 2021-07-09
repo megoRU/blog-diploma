@@ -1,6 +1,6 @@
 package main.service;
 
-import main.dto.Enums.RegistrationErrors;
+import main.dto.enums.RegistrationErrors;
 import main.dto.request.RegistrationRequest;
 import main.dto.responses.RegistrationResponse;
 import main.repositories.CaptchaRepository;
