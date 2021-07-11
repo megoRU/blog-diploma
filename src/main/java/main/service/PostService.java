@@ -3,6 +3,7 @@ package main.service;
 import main.dto.responses.*;
 import main.model.Post;
 import main.model.PostComment;
+import main.model.enums.ModerationStatus;
 import main.repositories.CommentsRepository;
 import main.repositories.PostRepository;
 import main.repositories.TagsRepository;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class PostService {
@@ -78,7 +80,7 @@ public class PostService {
         for (Post p : postsPage) {
             postResponseList.add(new PostResponseForList(p));
         }
-        return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+        return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
     }
 
     public PostsResponse getPostsByDate(int offset, int limit, String date) {
@@ -90,7 +92,7 @@ public class PostService {
             for (Post p : postsPage) {
                 postResponseList.add(new PostResponseForList(p));
             }
-            return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+            return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
     }
@@ -104,7 +106,7 @@ public class PostService {
             for (Post p : postsPage) {
                 postResponseList.add(new PostResponseForList(p));
             }
-            return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+            return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
     }
@@ -125,4 +127,17 @@ public class PostService {
         return new ResponseEntity<>(new PostResponseForList(post, commentsResponseList, tagList), HttpStatus.OK);
     }
 
+    //TODO: Переписать когда будет Spring Security
+    public ResponseEntity<?> getPostForModeration(int offset, int limit, String status) {
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        Page<Post> postsPage = postRepository.findAllPostForModerator(ModerationStatus.valueOf(status), 2, pageable);
+
+        List<PostResponseForList> postResponseList = new ArrayList<>();
+
+        for (Post p : postsPage) {
+            postResponseList.add(new PostResponseForList(p));
+        }
+
+        return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
+    }
 }

@@ -1,6 +1,7 @@
 package main.repositories;
 
 import main.model.Post;
+import main.model.enums.ModerationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +45,6 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(value = "SELECT p FROM Post p WHERE p.id = :id")
     Post findPostById(@Param("id") int id);
 
+    @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = :status AND p.moderatorId = :moderatorId AND p.time < CURRENT_DATE ORDER BY p.time")
+    Page<Post> findAllPostForModerator(@Param("status") ModerationStatus status, @Param("moderatorId") Integer moderatorId, Pageable pageable);
 }

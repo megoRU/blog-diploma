@@ -1,12 +1,10 @@
 package main.controller;
 
-import main.dto.responses.PostResponseForList;
 import main.dto.responses.PostsResponse;
 import main.dto.responses.TagsResponseList;
 import main.service.PostService;
 import main.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,5 +66,13 @@ public class ApiPostController {
         return postService.getPostsById(ID);
     }
 
+    @GetMapping("/api/post/moderation")
+    private ResponseEntity<?> getPostForModeration(
+            @RequestParam(required = false, defaultValue = "0") int offset,
+            @RequestParam(required = false, defaultValue = "10") int limit,
+            @RequestParam(required = false, defaultValue = "NEW") String status) {
+
+        return postService.getPostForModeration(offset, limit, status);
+    }
 
 }
