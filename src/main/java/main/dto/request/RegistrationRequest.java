@@ -19,14 +19,4 @@ public class RegistrationRequest {
     private String captcha;
     private String captcha_secret;
 
-    @Override
-    public String toString() {
-        return "RegistrationRequest{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", name='" + name + '\'' +
-                ", captcha='" + captcha + '\'' +
-                ", captcha_secret='" + captcha_secret + '\'' +
-                '}';
-    }
 }

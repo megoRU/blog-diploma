@@ -32,7 +32,6 @@ public class RegistrationService {
 
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         Map<RegistrationErrors, String> list = new HashMap<>();
-        System.out.println(registrationRequest.toString());
 
         if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
             list.put(RegistrationErrors.EMAIL, RegistrationErrors.EMAIL.getErrors());
