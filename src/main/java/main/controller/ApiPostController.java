@@ -1,11 +1,11 @@
 package main.controller;
 
+import lombok.RequiredArgsConstructor;
 import main.dto.request.CreatePost;
 import main.dto.responses.PostsResponse;
 import main.dto.responses.TagsResponseList;
 import main.service.PostService;
 import main.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,16 +14,11 @@ import java.security.Principal;
 import java.util.Locale;
 
 @RestController
+@RequiredArgsConstructor
 public class ApiPostController {
 
     private final PostService postService;
     private final TagService tagService;
-
-    @Autowired
-    public ApiPostController(PostService postService, TagService tagService) {
-        this.postService = postService;
-        this.tagService = tagService;
-    }
 
     @GetMapping("/api/post")
     public ResponseEntity<PostsResponse> getPosts(
