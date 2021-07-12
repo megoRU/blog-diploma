@@ -15,5 +15,4 @@ public enum Permission {
         return permission;
     }
 
-
 }

@@ -6,8 +6,11 @@ import main.dto.responses.TagsResponseList;
 import main.service.PostService;
 import main.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 import java.util.Locale;
 
 @RestController
@@ -61,31 +64,39 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/{ID}")
-    private ResponseEntity<?> getPostsById(@PathVariable int ID) {
-        return postService.getPostsById(ID);
+    private ResponseEntity<?> getPostsById(@PathVariable int ID, Principal principal) {
+        return postService.getPostsById(ID, principal);
     }
 
     @GetMapping("/api/post/moderation")
     private ResponseEntity<?> getPostForModeration(
             @RequestParam(required = false, defaultValue = "0") int offset,
             @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "NEW") String status) {
-
-        return postService.getPostForModeration(offset, limit, status);
+            @RequestParam(required = false, defaultValue = "NEW") String status,
+            Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return postService.getPostForModeration(offset, limit, status.toUpperCase(Locale.ROOT));
     }
 
     @GetMapping("/api/post/my")
     private ResponseEntity<?> getMyPosts(
             @RequestParam(required = false, defaultValue = "0") int offset,
             @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "PUBLISHED") String status) {
-
+            @RequestParam(required = false, defaultValue = "PUBLISHED") String status,
+            Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         return postService.getMyPosts(offset, limit, status.toUpperCase(Locale.ROOT));
     }
 
     @PostMapping("/api/post")
-    private ResponseEntity<?> createPost(@RequestBody CreatePost createPost) {
-
+    private ResponseEntity<?> createPost(@RequestBody CreatePost createPost, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         return postService.createPost(createPost);
     }
 }

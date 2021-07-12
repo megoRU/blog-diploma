@@ -18,14 +18,13 @@ public class UserLoginResponse {
     private int moderationCount;
     private boolean settings;
 
-    public UserLoginResponse(User user) {
+    public UserLoginResponse(User user, Integer moderationCount) {
         this.id = user.getId();
         this.name = user.getName();
         this.photo = user.getPhoto();
         this.email = user.getEmail();
         this.moderation = user.getIsModerator() == 1;
-        //Нужно прописать логику или выборку
-        this.moderationCount = 0;
+        this.moderationCount = moderationCount;
         //тут тоже
         this.settings = true;
     }

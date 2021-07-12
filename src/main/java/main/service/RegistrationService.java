@@ -3,9 +3,12 @@ package main.service;
 import main.dto.enums.RegistrationErrors;
 import main.dto.request.RegistrationRequest;
 import main.dto.responses.RegistrationResponse;
+import main.dto.responses.ResultResponse;
 import main.repositories.CaptchaRepository;
 import main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +30,7 @@ public class RegistrationService {
         this.userRepository = userRepository;
     }
 
-    public RegistrationResponse registration(@RequestBody RegistrationRequest registrationRequest) {
+    public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         Map<RegistrationErrors, String> list = new HashMap<>();
         System.out.println(registrationRequest.toString());
 
@@ -54,10 +57,10 @@ public class RegistrationService {
                     new Date(),
                     new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()),
                     getRandomNumber());
-            return new RegistrationResponse(true);
+            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 
-        return new RegistrationResponse(false, list);
+        return new ResponseEntity<>(new RegistrationResponse(false, list), HttpStatus.OK);
     }
 
     private String getRandomNumber() {
