@@ -1,6 +1,5 @@
 package main.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,20 +10,19 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "global_settings")
-public class GlobalSettings {
+@Table(name = "tag2post")
+public class Tags2Post {
 
     @Id
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false)
-    private String code;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private String value;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tag_id", nullable = false)
+    private Tag tag;
 }

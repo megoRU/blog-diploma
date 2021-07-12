@@ -1,68 +1,74 @@
 package main.controller;
 
-import main.api.request.LoginRequest;
-import main.api.responses.InitResponse;
-import main.api.responses.LoginResponse;
-import main.api.responses.UserLoginResponse;
-import main.model.repositories.UserRepository;
+import main.dto.request.LoginRequest;
+import main.dto.request.RegistrationRequest;
+import main.dto.responses.LoginResponse;
+import main.dto.responses.RegistrationResponse;
+import main.dto.responses.UserLoginResponseList;
+import main.model.User;
+import main.repositories.UserRepository;
+import main.service.CaptchaService;
+import main.service.CheckService;
+import main.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.util.Optional;
+
 @RestController
 public class ApiAuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    //Доделать
-    private final InitResponse initResponse;
+    private final CheckService checkService;
+    private final CaptchaService captchaService;
+    private final RegistrationService registrationService;
+
 
     @Autowired
-    public ApiAuthController(AuthenticationManager authenticationManager, UserRepository userRepository, InitResponse initResponse) {
-        this.authenticationManager = authenticationManager;
+    public ApiAuthController(UserRepository userRepository, CheckService checkService, CaptchaService captchaService, RegistrationService registrationService) {
         this.userRepository = userRepository;
-        this.initResponse = initResponse;
+        this.checkService = checkService;
+        this.captchaService = captchaService;
+        this.registrationService = registrationService;
     }
 
     @GetMapping("/api/auth/check")
-    private InitResponse check() {
-        return initResponse;
+    private ResponseEntity<UserLoginResponseList> check() {
+//        System.out.println(checkService.getCheck());
+//        if (checkService.getCheck() == null) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+//        }
+
+        return ResponseEntity.ok(checkService.getCheck());
     }
 
-    @PostMapping("/api/auth/login")
+    @PostMapping(value = "/api/auth/login")
     private ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
 
-        Authentication auth = authenticationManager
-                .authenticate(
-                        new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        User user = (User) auth.getPrincipal();
-
-        main.model.User currentUser = userRepository
-                .findByEmail(user.getUsername()).orElseThrow(() -> new UsernameNotFoundException(user.getUsername()));
-
-        UserLoginResponse userLoginResponse = new UserLoginResponse();
-        userLoginResponse.setEmail(currentUser.getEmail());
-        userLoginResponse.setModeration(currentUser.getIsModerator() == 1);
-        userLoginResponse.setId(currentUser.getId());
-
-
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setResult(true);
-        loginResponse.setUserLoginResponse(userLoginResponse);
-
         System.out.println(loginRequest.getEmail());
-        return ResponseEntity.ok(loginResponse);
+
+        Optional<User> user = userRepository.findByEmail(loginRequest.getEmail());
+
+        System.out.println(user.get().getPassword());
+
+        System.out.println(userRepository.findByEmail(loginRequest.getEmail()));
+
+        return ResponseEntity.ok(new LoginResponse());
+    }
+
+    @GetMapping(value = "/api/auth/captcha")
+    private ResponseEntity<?> captcha() throws IOException {
+        return captchaService.getCaptcha();
+    }
+
+    @PostMapping(value = "/api/auth/register")
+    private ResponseEntity<RegistrationResponse> registration(@RequestBody RegistrationRequest registrationRequest) {
+        return ResponseEntity.ok(registrationService.registration(registrationRequest));
     }
 
 }

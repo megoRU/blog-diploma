@@ -1,6 +1,5 @@
 package main.model;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,8 +10,8 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "global_settings")
-public class GlobalSettings {
+@Table(name = "tags")
+public class Tag {
 
     @Id
     @Column(nullable = false)
@@ -20,11 +19,5 @@ public class GlobalSettings {
     private int id;
 
     @Column(nullable = false)
-    private String code;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private String value;
 }
