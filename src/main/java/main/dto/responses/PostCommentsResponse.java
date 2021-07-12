@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import main.model.PostComment;
+
 import java.time.ZoneOffset;
 
 @Setter
@@ -18,7 +19,7 @@ public class PostCommentsResponse {
 
     public PostCommentsResponse(PostComment postComment) {
         this.id = postComment.getId();
-        this.timestamp = postComment.getTime().toEpochSecond(ZoneOffset.ofHours(3));
+        this.timestamp = postComment.getTime().toEpochSecond(ZoneOffset.UTC);
         this.text = postComment.getText();
         this.user = new UserPostResponse(postComment.getUser());
     }

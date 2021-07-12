@@ -2,8 +2,9 @@ package main.dto.responses;
 
 import lombok.Getter;
 import lombok.Setter;
-import main.model.PostVote;
 import main.model.Post;
+import main.model.PostVote;
+
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class PostResponseForList {
 
     public PostResponseForList(Post post, List<PostCommentsResponse> comments, List<String> tags) {
         this.id = post.getId();
-        this.timestamp = post.getTime().toEpochSecond(ZoneOffset.ofHours(3));
+        this.timestamp = post.getTime().toEpochSecond(ZoneOffset.UTC);
         this.user = new UserPostResponse(post.getUser());
         this.title = post.getTitle();
         this.text = post.getText();
@@ -42,7 +43,7 @@ public class PostResponseForList {
 
     public PostResponseForList(Post post) {
         this.id = post.getId();
-        this.timestamp = post.getTime().toEpochSecond(ZoneOffset.ofHours(3));
+        this.timestamp = post.getTime().toEpochSecond(ZoneOffset.UTC);
         this.user = new UserPostResponse(post.getUser());
         this.title = post.getTitle();
         this.text = post.getText();
