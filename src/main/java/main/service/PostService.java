@@ -4,14 +4,9 @@ import lombok.RequiredArgsConstructor;
 import main.dto.enums.PostErrors;
 import main.dto.request.CreatePost;
 import main.dto.responses.*;
-import main.model.Post;
-import main.model.PostComment;
-import main.model.User;
+import main.model.*;
 import main.model.enums.ModerationStatus;
-import main.repositories.CommentsRepository;
-import main.repositories.PostRepository;
-import main.repositories.TagsRepository;
-import main.repositories.UserRepository;
+import main.repositories.*;
 import main.security.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,9 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +29,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final TagsRepository tagsRepository;
+    private final Tags2PostRepository tags2PostRepository;
     private final CommentsRepository commentsRepository;
     private final UserRepository userRepository;
     private final UserService userService;
@@ -202,6 +201,7 @@ public class PostService {
         return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
     }
 
+
     public ResponseEntity<?> createPost(CreatePost createPost) {
         Map<PostErrors, String> list = new HashMap<>();
 
@@ -218,13 +218,22 @@ public class PostService {
             User user = userService.getCurrentUser();
             post.setUser(user);
             post.setIsActive(createPost.getActive());
-            //TODO: Rewrite to UTC
-            post.setTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(createPost.getTimestamp()), TimeZone.getDefault().toZoneId()));
+            post.setTime(LocalDateTime.ofEpochSecond(createPost.getTimestamp(), 0, ZoneOffset.UTC));
             post.setTitle(createPost.getTitle());
             post.setText(createPost.getText());
             post.setModerationStatus(ModerationStatus.NEW);
             post.setModeratorId(null);
             postRepository.save(post);
+
+            for (String t : createPost.getTags()) {
+                Tag tag = new Tag();
+                Tags2Post tags2Post = new Tags2Post();
+                tag.setName(t);
+                tags2Post.setPost(post);
+                tags2Post.setTag(tagsRepository.save(tag));
+                tags2PostRepository.save(tags2Post);
+            }
+
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 
