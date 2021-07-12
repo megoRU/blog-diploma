@@ -1,14 +1,11 @@
 package main.model;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import main.model.enums.Role;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @Entity
 @Table(name = "users")

@@ -4,12 +4,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "global_settings")
-public class GlobalSettings {
+@Table(name = "captcha_codes")
+public class CaptchaCodes {
 
     @Id
     @Column(nullable = false)
@@ -17,11 +18,11 @@ public class GlobalSettings {
     private int id;
 
     @Column(nullable = false)
+    private LocalDateTime time;
+
+    @Column(nullable = false)
     private String code;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private String value;
+    @Column(name = "secret_code", nullable = false)
+    private String secretCode;
 }
