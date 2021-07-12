@@ -1,37 +1,42 @@
 package main.service;
 
+import lombok.RequiredArgsConstructor;
+import main.dto.enums.PostErrors;
+import main.dto.request.CreatePost;
 import main.dto.responses.*;
 import main.model.Post;
 import main.model.PostComment;
+import main.model.User;
+import main.model.enums.ModerationStatus;
 import main.repositories.CommentsRepository;
 import main.repositories.PostRepository;
 import main.repositories.TagsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import main.repositories.UserRepository;
+import main.security.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.security.Principal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final TagsRepository tagsRepository;
     private final CommentsRepository commentsRepository;
+    private final UserRepository userRepository;
+    private final UserService userService;
     private static final String dateStart = " 00:00:00";
     private static final String dateEnd = " 23:59:59";
     private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
-
-    @Autowired
-    public PostService(PostRepository postRepository, TagsRepository tagsRepository, CommentsRepository commentsRepository) {
-        this.postRepository = postRepository;
-        this.tagsRepository = tagsRepository;
-        this.commentsRepository = commentsRepository;
-    }
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
@@ -78,7 +83,7 @@ public class PostService {
         for (Post p : postsPage) {
             postResponseList.add(new PostResponseForList(p));
         }
-        return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+        return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
     }
 
     public PostsResponse getPostsByDate(int offset, int limit, String date) {
@@ -90,7 +95,7 @@ public class PostService {
             for (Post p : postsPage) {
                 postResponseList.add(new PostResponseForList(p));
             }
-            return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+            return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
     }
@@ -104,18 +109,39 @@ public class PostService {
             for (Post p : postsPage) {
                 postResponseList.add(new PostResponseForList(p));
             }
-            return new PostsResponse(postsPage.getTotalPages(), postResponseList);
+            return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
     }
 
-    //TODO: Переписать когда будет Spring Security
-    public ResponseEntity<?> getPostsById(Integer id) {
+    public ResponseEntity<?> getPostsById(Integer id, Principal principal) {
         Post post = postRepository.findPostById(id);
+
+        if (principal != null && userService.getCurrentUser().getIsModerator() == 1) {
+            Post postByIdForModerator = postRepository.findPostByIdForModerator(id);
+            return postResponse(postByIdForModerator, id);
+        }
+
         if (post == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        User user = null;
+        try {
+            user = userRepository.findByEmail(principal.getName()).get();
+        } catch (Exception e) {
+            System.out.println("user not found");
+        }
+
+        if (user == null || !(post.getUser().getId() == user.getId()) || user.getIsModerator() == 0) {
+            post.setViewCount(post.getViewCount() + 1);
+            postRepository.save(post);
+        }
+
+        return postResponse(post, id);
+    }
+
+    private ResponseEntity<?> postResponse(Post post, Integer id) {
         List<PostComment> commentsList = commentsRepository.findComments(id);
         List<String> tagList = tagsRepository.getTagsByPost(id);
         List<PostCommentsResponse> commentsResponseList = new ArrayList<>();
@@ -125,4 +151,83 @@ public class PostService {
         return new ResponseEntity<>(new PostResponseForList(post, commentsResponseList, tagList), HttpStatus.OK);
     }
 
+    public ResponseEntity<?> getPostForModeration(int offset, int limit, String status) {
+        if (userService.getCurrentUser().getIsModerator() == 0) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+
+        Page<Post> postsPage;
+
+        if ("NEW".equals(status)) {
+            postsPage = postRepository.findAllPostForModeratorNew(pageable);
+        } else {
+            postsPage = postRepository.findAllPostForModerator(ModerationStatus.valueOf(status), userService.getCurrentUser().getId(), pageable);
+        }
+
+        List<PostResponseForList> postResponseList = new ArrayList<>();
+
+        for (Post p : postsPage) {
+            postResponseList.add(new PostResponseForList(p));
+        }
+
+        return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getMyPosts(int offset, int limit, String status) {
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+
+        Page<Post> postsPage;
+
+        switch (status) {
+            case "INACTIVE":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 0, userService.getCurrentUser().getId(), pageable);
+                break;
+            case "PENDING":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
+                break;
+            case "DECLINED":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
+                break;
+            default:
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
+        }
+
+        List<PostResponseForList> postResponseList = new ArrayList<>();
+
+        for (Post p : postsPage) {
+            postResponseList.add(new PostResponseForList(p));
+        }
+
+        return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> createPost(CreatePost createPost) {
+        Map<PostErrors, String> list = new HashMap<>();
+
+        if (createPost.getText().length() < 3 || createPost.getText().length() > 50) {
+            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+        }
+
+        if (createPost.getTitle().length() < 3 || createPost.getTitle().length() > 50) {
+            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+        }
+
+        if (list.isEmpty()) {
+            Post post = new Post();
+            User user = userService.getCurrentUser();
+            post.setUser(user);
+            post.setIsActive(createPost.getActive());
+            //TODO: Rewrite to UTC
+            post.setTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(createPost.getTimestamp()), TimeZone.getDefault().toZoneId()));
+            post.setTitle(createPost.getTitle());
+            post.setText(createPost.getText());
+            post.setModerationStatus(ModerationStatus.NEW);
+            post.setModeratorId(null);
+            postRepository.save(post);
+            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new CreatePostResponse(false, list), HttpStatus.OK);
+    }
 }

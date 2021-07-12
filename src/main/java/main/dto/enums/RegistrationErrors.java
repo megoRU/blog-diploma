@@ -1,4 +1,4 @@
-package main.dto.Enums;
+package main.dto.enums;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

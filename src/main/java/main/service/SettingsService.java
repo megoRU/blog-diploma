@@ -1,9 +1,12 @@
 package main.service;
 
 import main.dto.responses.SettingsResponse;
+import main.model.GlobalSettings;
 import main.repositories.GlobalSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Service
 public class SettingsService {
@@ -16,10 +19,11 @@ public class SettingsService {
     }
 
     public SettingsResponse getGlobalSettings() {
-        SettingsResponse settingsResponse = new SettingsResponse();
-        settingsResponse.setMultiuserMode(globalSettingsRepository.findAllGlobalSettings("MULTIUSER_MODE").getValue().equals("YES"));
-        settingsResponse.setPostPremoderation(globalSettingsRepository.findAllGlobalSettings("POST_PREMODERATION").getValue().equals("YES"));
-        settingsResponse.setStatisticIsPublic(globalSettingsRepository.findAllGlobalSettings("STATISTICS_IS_PUBLIC").getValue().equals("YES"));
-        return settingsResponse;
+        Iterable<GlobalSettings> globalSettings = globalSettingsRepository.findAll();
+        ArrayList<GlobalSettings> list = new ArrayList<>((Collection<? extends GlobalSettings>) globalSettings);
+        return new SettingsResponse(
+                list.get(0).getValue().equals("YES"),
+                list.get(1).getValue().equals("YES"),
+                list.get(2).getValue().equals("YES"));
     }
 }

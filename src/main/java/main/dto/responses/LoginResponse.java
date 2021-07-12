@@ -1,14 +1,20 @@
 package main.dto.responses;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import main.model.User;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class LoginResponse {
 
     private boolean result;
-    @JsonProperty("user")
-    private UserLoginResponse userLoginResponse;
+    private UserLoginResponse user;
+
+    public LoginResponse(Boolean result, User user, Integer moderationCount) {
+        this.result = result;
+        this.user = new UserLoginResponse(user, moderationCount);
+    }
 }

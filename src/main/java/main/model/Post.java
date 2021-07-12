@@ -23,13 +23,12 @@ public class Post {
     @Column(name = "is_active", nullable = false)
     private int isActive;
 
-    //По умолчанию NEW!
     @Enumerated(EnumType.STRING)
-    @Column(name = "moderation_status", nullable = false)
+    @Column(name = "moderation_status", columnDefinition = "enum('NEW', 'ACCEPTED', 'DECLINED') default 'NEW'", nullable = false)
     private ModerationStatus moderationStatus;
 
-    @Column(name = "moderator_id", nullable = false)
-    private int moderatorId;
+    @Column(name = "moderator_id")
+    private Integer moderatorId;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
