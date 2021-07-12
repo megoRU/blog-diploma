@@ -1,91 +1,26 @@
 package main.controller;
 
-import main.dto.request.CreatePost;
-import main.dto.responses.PostsResponse;
-import main.dto.responses.TagsResponseList;
-import main.service.PostService;
-import main.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.Locale;
+import lombok.AllArgsConstructor;
+import main.api.responses.InitResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@AllArgsConstructor
 public class ApiPostController {
 
-    private final PostService postService;
-    private final TagService tagService;
-
-    @Autowired
-    public ApiPostController(PostService postService, TagService tagService) {
-        this.postService = postService;
-        this.tagService = tagService;
-    }
+    //Доделать
+    private final InitResponse initResponse;
 
     @GetMapping("/api/post")
-    public ResponseEntity<PostsResponse> getPosts(
-            @RequestParam(required = false, defaultValue = "0") int offset,
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "recent") String mode) {
-
-        return ResponseEntity.ok(postService.getPosts(offset, limit, mode));
+    @PreAuthorize("hasAuthority('user:write')")
+    private InitResponse post() {
+        return initResponse;
     }
 
     @GetMapping("/api/tag")
-    private ResponseEntity<TagsResponseList> tag(@RequestParam(required = false) String name) {
-        return ResponseEntity.ok(tagService.getTags(name));
-    }
-
-    @GetMapping("/api/post/search")
-    private ResponseEntity<PostsResponse> getPostsByName(
-            @RequestParam(required = false, defaultValue = "0") int offset,
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "") String query) {
-        return ResponseEntity.ok(postService.getPostsSearch(offset, limit, query));
-    }
-
-    @GetMapping("/api/post/byDate")
-    private ResponseEntity<PostsResponse> getPostsByDate(
-            @RequestParam(required = false, defaultValue = "0") int offset,
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "") String date) {
-        return ResponseEntity.ok(postService.getPostsByDate(offset, limit, date));
-    }
-
-    @GetMapping("/api/post/byTag")
-    private ResponseEntity<PostsResponse> getPostsByTag(
-            @RequestParam(required = false, defaultValue = "0") int offset,
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "") String tag) {
-        return ResponseEntity.ok(postService.getPostsByTag(offset, limit, tag));
-    }
-
-    @GetMapping("/api/post/{ID}")
-    private ResponseEntity<?> getPostsById(@PathVariable int ID) {
-        return postService.getPostsById(ID);
-    }
-
-    @GetMapping("/api/post/moderation")
-    private ResponseEntity<?> getPostForModeration(
-            @RequestParam(required = false, defaultValue = "0") int offset,
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "NEW") String status) {
-
-        return postService.getPostForModeration(offset, limit, status);
-    }
-
-    @GetMapping("/api/post/my")
-    private ResponseEntity<?> getMyPosts(
-            @RequestParam(required = false, defaultValue = "0") int offset,
-            @RequestParam(required = false, defaultValue = "10") int limit,
-            @RequestParam(required = false, defaultValue = "PUBLISHED") String status) {
-
-        return postService.getMyPosts(offset, limit, status.toUpperCase(Locale.ROOT));
-    }
-
-    @PostMapping("/api/post")
-    private ResponseEntity<?> createPost(@RequestBody CreatePost createPost) {
-
-        return postService.createPost(createPost);
+    private InitResponse tag() {
+        return initResponse;
     }
 }

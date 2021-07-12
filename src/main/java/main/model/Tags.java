@@ -2,14 +2,13 @@ package main.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "global_settings")
-public class GlobalSettings {
+@Table(name = "tags")
+public class Tags {
 
     @Id
     @Column(nullable = false)
@@ -17,11 +16,5 @@ public class GlobalSettings {
     private int id;
 
     @Column(nullable = false)
-    private String code;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private String value;
 }
