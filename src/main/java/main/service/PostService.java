@@ -1,12 +1,16 @@
 package main.service;
 
+import main.dto.enums.PostErrors;
+import main.dto.request.CreatePost;
 import main.dto.responses.*;
 import main.model.Post;
 import main.model.PostComment;
+import main.model.User;
 import main.model.enums.ModerationStatus;
 import main.repositories.CommentsRepository;
 import main.repositories.PostRepository;
 import main.repositories.TagsRepository;
+import main.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,9 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class PostService {
@@ -24,15 +28,17 @@ public class PostService {
     private final PostRepository postRepository;
     private final TagsRepository tagsRepository;
     private final CommentsRepository commentsRepository;
+    private final UserRepository userRepository;
     private static final String dateStart = " 00:00:00";
     private static final String dateEnd = " 23:59:59";
     private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
 
     @Autowired
-    public PostService(PostRepository postRepository, TagsRepository tagsRepository, CommentsRepository commentsRepository) {
+    public PostService(PostRepository postRepository, TagsRepository tagsRepository, CommentsRepository commentsRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.tagsRepository = tagsRepository;
         this.commentsRepository = commentsRepository;
+        this.userRepository = userRepository;
     }
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
@@ -112,6 +118,7 @@ public class PostService {
     }
 
     //TODO: Переписать когда будет Spring Security
+    //TODO: Сделать проверку на NEW и active. Любой может открыть пост по прямой ссылке
     public ResponseEntity<?> getPostsById(Integer id) {
         Post post = postRepository.findPostById(id);
         if (post == null) {
@@ -139,5 +146,64 @@ public class PostService {
         }
 
         return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
+    }
+
+    //TODO: Переписать когда будет Spring Security
+    public ResponseEntity<?> getMyPosts(int offset, int limit, String status) {
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+
+        Page<Post> postsPage;
+
+        switch (status) {
+            case "INACTIVE":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 0, 1, pageable);
+                break;
+            case "PENDING":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 1, 1, pageable);
+                break;
+            case "DECLINED":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, 1, pageable);
+                break;
+            default:
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, 1, pageable);
+        }
+
+        List<PostResponseForList> postResponseList = new ArrayList<>();
+
+        for (Post p : postsPage) {
+            postResponseList.add(new PostResponseForList(p));
+        }
+
+        return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
+    }
+
+    //TODO: Переписать когда будет Spring Security
+    public ResponseEntity<?> createPost(CreatePost createPost) {
+        Map<PostErrors, String> list = new HashMap<>();
+
+        if (createPost.getText().length() < 3 || createPost.getText().length() > 50) {
+            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+        }
+
+        if (createPost.getTitle().length() < 3 || createPost.getTitle().length() > 50) {
+            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+        }
+
+        if (list.isEmpty()) {
+            Post post = new Post();
+            User user = userRepository.findByEmail("user@gmail.com").get();
+            post.setUser(user);
+            post.setIsActive(createPost.getActive());
+            //Rewrite to UTC
+            post.setTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(createPost.getTimestamp()), TimeZone.getDefault().toZoneId()));
+            post.setTitle(createPost.getTitle());
+            post.setText(createPost.getText());
+            post.setModerationStatus(ModerationStatus.NEW);
+            post.setModeratorId(null);
+            postRepository.save(post);
+            return new ResponseEntity<>(new CreatePostResponse(true), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new CreatePostResponse(false, list), HttpStatus.OK);
     }
 }

@@ -47,4 +47,10 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
 
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = :status AND p.moderatorId = :moderatorId AND p.time < CURRENT_DATE ORDER BY p.time")
     Page<Post> findAllPostForModerator(@Param("status") ModerationStatus status, @Param("moderatorId") Integer moderatorId, Pageable pageable);
+
+    @Query(value = "SELECT p FROM Post p WHERE p.isActive = :isActive AND p.moderationStatus = :status AND p.user.id = :userId AND p.time < CURRENT_DATE ORDER BY p.time")
+    Page<Post> findAllMyPosts(@Param("status") ModerationStatus status,
+                              @Param("isActive") Integer isActive,
+                              @Param("userId") Integer userId, Pageable pageable);
+
 }

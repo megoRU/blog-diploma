@@ -51,7 +51,7 @@ create table posts
     id                integer      not null auto_increment,
     is_active         integer      not null,
     moderation_status enum('NEW', 'ACCEPTED', 'DECLINED') not null,
-    moderator_id      integer      not null,
+    moderator_id      integer,
     text              TEXT         not null,
     time              DATETIME     not null,
     title             varchar(255) not null,
