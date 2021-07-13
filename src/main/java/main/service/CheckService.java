@@ -1,10 +1,10 @@
 package main.service;
 
+import lombok.RequiredArgsConstructor;
 import main.dto.responses.LoginResponse;
 import main.model.User;
 import main.repositories.PostRepository;
 import main.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,16 +13,11 @@ import java.security.Principal;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CheckService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
-    @Autowired
-    public CheckService(UserRepository userRepository, PostRepository postRepository) {
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-    }
 
     public ResponseEntity<?> getCheck(Principal principal) {
         Optional<User> user = userRepository.findByEmail(principal.getName());

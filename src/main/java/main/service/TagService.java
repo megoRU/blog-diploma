@@ -1,24 +1,20 @@
 package main.service;
 
+import lombok.RequiredArgsConstructor;
 import main.dto.responses.TagsResponse;
 import main.dto.responses.TagsResponseImpl;
 import main.dto.responses.TagsResponseList;
 import main.repositories.TagsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TagService {
 
     private final TagsRepository tagsRepository;
-
-    @Autowired
-    public TagService(TagsRepository tagsRepository) {
-        this.tagsRepository = tagsRepository;
-    }
 
     public TagsResponseList getTags(String name) {
         List<TagsResponse> tagsResponseLists = new ArrayList<>();

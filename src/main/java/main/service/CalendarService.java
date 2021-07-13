@@ -1,14 +1,16 @@
 package main.service;
 
+import lombok.RequiredArgsConstructor;
 import main.dto.responses.CalendarResponseList;
 import main.model.Post;
 import main.repositories.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class CalendarService {
 
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -18,10 +20,6 @@ public class CalendarService {
 
     private final PostRepository postRepository;
 
-    @Autowired
-    public CalendarService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
 
     //TODO: Сделать вывод только за конкретный год, Если параметр year пустой..?
     public CalendarResponseList getPublications(String year) {

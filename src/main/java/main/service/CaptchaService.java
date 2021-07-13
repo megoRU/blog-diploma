@@ -2,13 +2,14 @@ package main.service;
 
 import com.github.cage.Cage;
 import com.github.cage.GCage;
+import lombok.RequiredArgsConstructor;
 import main.dto.responses.CaptchaResponse;
 import main.repositories.CaptchaRepository;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
 import java.awt.*;
@@ -21,14 +22,10 @@ import java.util.Base64;
 
 @Transactional
 @Service
+@RequiredArgsConstructor
 public class CaptchaService {
 
     private final CaptchaRepository captchaRepository;
-
-    @Autowired
-    public CaptchaService(CaptchaRepository captchaRepository) {
-        this.captchaRepository = captchaRepository;
-    }
 
     public ResponseEntity<?> getCaptcha() throws IOException {
         final Cage cage = new GCage();

@@ -1,22 +1,19 @@
 package main.service;
 
+import lombok.RequiredArgsConstructor;
 import main.dto.responses.SettingsResponse;
 import main.model.GlobalSettings;
 import main.repositories.GlobalSettingsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
+@RequiredArgsConstructor
 public class SettingsService {
 
     private final GlobalSettingsRepository globalSettingsRepository;
-
-    @Autowired
-    public SettingsService(GlobalSettingsRepository globalSettingsRepository) {
-        this.globalSettingsRepository = globalSettingsRepository;
-    }
 
     public SettingsResponse getGlobalSettings() {
         Iterable<GlobalSettings> globalSettings = globalSettingsRepository.findAll();

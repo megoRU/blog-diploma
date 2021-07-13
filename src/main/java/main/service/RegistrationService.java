@@ -1,12 +1,12 @@
 package main.service;
 
+import lombok.RequiredArgsConstructor;
 import main.dto.enums.RegistrationErrors;
 import main.dto.request.RegistrationRequest;
 import main.dto.responses.RegistrationResponse;
 import main.dto.responses.ResultResponse;
 import main.repositories.CaptchaRepository;
 import main.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,16 +19,11 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
+@RequiredArgsConstructor
 public class RegistrationService {
 
     private final CaptchaRepository captchaRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    public RegistrationService(CaptchaRepository captchaRepository, UserRepository userRepository) {
-        this.captchaRepository = captchaRepository;
-        this.userRepository = userRepository;
-    }
 
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         Map<RegistrationErrors, String> list = new HashMap<>();
