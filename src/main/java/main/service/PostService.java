@@ -132,7 +132,7 @@ public class PostService {
             System.out.println("user not found");
         }
 
-        if (user == null || !(post.getUser().getId() == user.getId()) || user.getIsModerator() == 0) {
+        if (user == null || (!(post.getUser().getId() == user.getId()) && user.getIsModerator() == 0)) {
             post.setViewCount(post.getViewCount() + 1);
             postRepository.save(post);
         }
