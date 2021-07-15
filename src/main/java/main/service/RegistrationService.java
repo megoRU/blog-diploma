@@ -5,6 +5,7 @@ import main.dto.enums.RegistrationErrors;
 import main.dto.request.RegistrationRequest;
 import main.dto.responses.RegistrationResponse;
 import main.dto.responses.ResultResponse;
+import main.model.User;
 import main.repositories.CaptchaRepository;
 import main.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -45,12 +46,13 @@ public class RegistrationService {
         }
 
         if (list.isEmpty()) {
-            userRepository.insertUser(
-                    registrationRequest.getEmail(),
-                    registrationRequest.getName(),
-                    new Date(),
-                    new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()),
-                    getRandomNumber());
+            User user = new User();
+            user.setEmail(registrationRequest.getEmail());
+            user.setName(registrationRequest.getName());
+            user.setRegTime(LocalDateTime.now());
+            user.setPassword(new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()));
+            user.setCode(getRandomNumber());
+            userRepository.save(user);
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,10 +62,7 @@ public class PostService {
     }
 
     private PostsResponse getPosts(Page<Post> postsPages, int size) {
-        List<PostResponseForList> postResponseList = new ArrayList<>();
-        for (Post p : postsPages) {
-            postResponseList.add(new PostResponseForList(p));
-        }
+        List<PostResponseForList> postResponseList = postsPages.get().map(PostResponseForList::new).collect(Collectors.toList());
         return new PostsResponse(size, postResponseList);
     }
 
@@ -77,11 +75,9 @@ public class PostService {
 
         Pageable pageable = PageRequest.of(offset / limit, limit);
         Page<Post> postsPage = postRepository.findAllPostsByName(query, pageable);
-        List<PostResponseForList> postResponseList = new ArrayList<>();
 
-        for (Post p : postsPage) {
-            postResponseList.add(new PostResponseForList(p));
-        }
+        List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
+
         return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
     }
 
@@ -89,11 +85,9 @@ public class PostService {
         if (date.matches(dateRegex)) {
             Pageable pageable = PageRequest.of(offset / limit, limit);
             Page<Post> postsPage = postRepository.findAllPostsByDate(date + dateStart, date + dateEnd, pageable);
-            List<PostResponseForList> postResponseList = new ArrayList<>();
 
-            for (Post p : postsPage) {
-                postResponseList.add(new PostResponseForList(p));
-            }
+            List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
+
             return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
@@ -103,11 +97,9 @@ public class PostService {
         if (!tag.equals("")) {
             Pageable pageable = PageRequest.of(offset / limit, limit);
             Page<Post> postsPage = postRepository.findAllPostsByTag(tag, pageable);
-            List<PostResponseForList> postResponseList = new ArrayList<>();
 
-            for (Post p : postsPage) {
-                postResponseList.add(new PostResponseForList(p));
-            }
+            List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
+
             return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
         }
         return new PostsResponse(0, new ArrayList<>());
@@ -158,17 +150,13 @@ public class PostService {
 
         Page<Post> postsPage;
 
-        if ("NEW".equals(status)) {
+        if (ModerationStatus.NEW.toString().equals(status)) {
             postsPage = postRepository.findAllPostForModeratorNew(pageable);
         } else {
             postsPage = postRepository.findAllPostForModerator(ModerationStatus.valueOf(status), userService.getCurrentUser().getId(), pageable);
         }
 
-        List<PostResponseForList> postResponseList = new ArrayList<>();
-
-        for (Post p : postsPage) {
-            postResponseList.add(new PostResponseForList(p));
-        }
+        List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
         return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
     }
@@ -192,11 +180,7 @@ public class PostService {
                 postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
         }
 
-        List<PostResponseForList> postResponseList = new ArrayList<>();
-
-        for (Post p : postsPage) {
-            postResponseList.add(new PostResponseForList(p));
-        }
+        List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
         return new ResponseEntity<>(new PostsResponse(postsPage.getNumberOfElements(), postResponseList), HttpStatus.OK);
     }

@@ -4,6 +4,7 @@ import com.github.cage.Cage;
 import com.github.cage.GCage;
 import lombok.RequiredArgsConstructor;
 import main.dto.responses.CaptchaResponse;
+import main.model.CaptchaCode;
 import main.repositories.CaptchaRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 @Transactional
@@ -29,14 +29,16 @@ public class CaptchaService {
 
     public ResponseEntity<?> getCaptcha() throws IOException {
         final Cage cage = new GCage();
-
-        String token = cage.getTokenGenerator().next();
+        String token = cage.getTokenGenerator().next().substring(0, 5);
         String secretKey = generateSecretKey();
         String base64String = ConvertImageToBase64(token, cage);
-        captchaRepository.insertCaptcha(token, secretKey, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+        CaptchaCode captchaCode = new CaptchaCode();
+        captchaCode.setCode(token);
+        captchaCode.setSecretCode(secretKey);
+        captchaCode.setTime(LocalDateTime.now());
+        captchaRepository.save(captchaCode);
         return new ResponseEntity<>(new CaptchaResponse(secretKey, base64String), HttpStatus.OK);
     }
-
 
     private String ConvertImageToBase64(String token, Cage cage) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
