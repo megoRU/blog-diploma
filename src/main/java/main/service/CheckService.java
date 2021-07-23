@@ -19,6 +19,7 @@ public class CheckService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    //TODO: Проверка на NULL User
     public ResponseEntity<?> getCheck(Principal principal) {
         Optional<User> user = userRepository.findByEmail(principal.getName());
         return new ResponseEntity<>(new LoginResponse(

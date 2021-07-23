@@ -3,7 +3,7 @@ package main.service;
 import lombok.RequiredArgsConstructor;
 import main.dto.enums.RegistrationErrors;
 import main.dto.request.RegistrationRequest;
-import main.dto.responses.RegistrationResponse;
+import main.dto.responses.CreateResponse;
 import main.dto.responses.ResultResponse;
 import main.model.User;
 import main.repositories.CaptchaRepository;
@@ -56,7 +56,7 @@ public class RegistrationService {
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(new RegistrationResponse(false, list), HttpStatus.OK);
+        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
     }
 
     private String getRandomNumber() {

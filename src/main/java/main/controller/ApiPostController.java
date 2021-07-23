@@ -94,4 +94,15 @@ public class ApiPostController {
         }
         return postService.createPost(createPost);
     }
+
+    @PutMapping("/api/post/{ID}")
+    private ResponseEntity<?> editPost(@PathVariable int ID,
+                                       Principal principal,
+                                       @RequestBody CreatePost createPost) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return postService.editPost(ID, principal, createPost);
+    }
 }

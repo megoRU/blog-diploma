@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,13 +104,17 @@ public class PostService {
 
     public ResponseEntity<?> getPostsById(Integer id, Principal principal) {
         Post post = postRepository.findPostById(id);
+        Post postUser = null;
 
-        if (principal != null && userService.getCurrentUser().getIsModerator() == 1) {
-            Post postByIdForModerator = postRepository.findPostByIdForModerator(id);
-            return postResponse(postByIdForModerator, id);
+        if (principal != null) {
+            postUser = postRepository.findPostByIdForUser(id, userService.getCurrentUser().getId());
+            if (userService.getCurrentUser().getIsModerator() == 1) {
+                Post postByIdForModerator = postRepository.findPostByIdForModerator(id);
+                return postResponse(postByIdForModerator, id);
+            }
         }
 
-        if (post == null) {
+        if (post == null && postUser == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -122,6 +123,10 @@ public class PostService {
             user = userRepository.findByEmail(principal.getName()).get();
         } catch (Exception e) {
             System.out.println("user not found");
+        }
+
+        if (postUser != null) {
+            return postResponse(postUser, id);
         }
 
         if (user == null || (!(post.getUser().getId() == user.getId()) && user.getIsModerator() == 0)) {
@@ -221,6 +226,61 @@ public class PostService {
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(new CreatePostResponse(false, list), HttpStatus.OK);
+        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+    }
+
+    //TODO: Удалять только те которых нет в createPost. Ещё время сохранения надо поправить вроде
+    public ResponseEntity<?> editPost(int id, Principal principal, CreatePost createPost) {
+        Map<PostErrors, String> list = new HashMap<>();
+
+        Post post = postRepository.findPostByIdForUser(id, userService.getCurrentUser().getId());
+
+        if (post == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        if (post.getUser().getId() != userService.getCurrentUser().getId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        if (createPost.getText().length() < 3 || createPost.getText().length() > 50) {
+            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+        }
+
+        if (createPost.getTitle().length() < 3 || createPost.getTitle().length() > 50) {
+            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+        }
+
+        if (!list.isEmpty()) {
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+        }
+
+        Date dateNow = new Date();
+        Date datePost = new Date(createPost.getTimestamp());
+
+        if (datePost.before(dateNow)) {
+            datePost = dateNow;
+        }
+
+        if (userService.getCurrentUser().getIsModerator() == 0) {
+            postRepository.updatePost(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
+                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC), ModerationStatus.NEW);
+        } else {
+            postRepository.updatePostForModerator(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
+                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+        }
+
+        tags2PostRepository.deleteTagsPyPostId(id);
+
+        for (String tags : createPost.getTags()) {
+                Tag tag = new Tag();
+                tag.setName(tags);
+                Tags2Post tags2Post = new Tags2Post();
+                tags2Post.setPost(post);
+                tags2Post.setTag(tagsRepository.save(tag));
+                tags2PostRepository.save(tags2Post);
+        }
+
+        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
 }

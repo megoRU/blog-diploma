@@ -4,11 +4,14 @@ import main.model.Post;
 import main.model.enums.ModerationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -48,6 +51,9 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(value = "SELECT p FROM Post p WHERE p.id = :id AND p.isActive = 1")
     Post findPostByIdForModerator(@Param("id") int id);
 
+    @Query(value = "SELECT p FROM Post p WHERE p.id = :id AND p.user.id = :userId")
+    Post findPostByIdForUser(@Param("id") int id, @Param("userId") int userId);
+
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = :status AND p.moderatorId = :moderatorId AND p.time < CURRENT_TIME ORDER BY p.time")
     Page<Post> findAllPostForModerator(@Param("status") ModerationStatus status, @Param("moderatorId") Integer moderatorId, Pageable pageable);
 
@@ -62,4 +68,24 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
 
     @Query(value = "SELECT COUNT(p) FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'NEW'")
     int findCountAllPostsForModerator(@Param("email") String email);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE Post p SET p.text = :text, p.title = :title, p.isActive = :active, p.time = :time, p.moderationStatus = :status WHERE p.id = :id")
+    void updatePost(@Param("id") Integer id,
+                    @Param("title") String title,
+                    @Param("text") String text,
+                    @Param("active") Integer active,
+                    @Param("time") LocalDateTime time,
+                    @Param("status") ModerationStatus status);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE Post p SET p.text = :text, p.title = :title, p.isActive = :active, p.time = :time WHERE p.id = :id")
+    void updatePostForModerator(@Param("id") Integer id,
+                    @Param("title") String title,
+                    @Param("text") String text,
+                    @Param("active") Integer active,
+                    @Param("time") LocalDateTime time);
+
 }
