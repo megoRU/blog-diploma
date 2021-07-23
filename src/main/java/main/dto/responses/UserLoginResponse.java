@@ -24,8 +24,7 @@ public class UserLoginResponse {
         this.photo = user.getPhoto();
         this.email = user.getEmail();
         this.moderation = user.getIsModerator() == 1;
-        this.moderationCount = moderationCount;
-        //тут тоже
-        this.settings = true;
+        this.moderationCount = user.getIsModerator() == 1 ? moderationCount : 0;
+        this.settings = user.getIsModerator() == 1;
     }
 }
