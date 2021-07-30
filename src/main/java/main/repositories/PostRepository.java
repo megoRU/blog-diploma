@@ -66,6 +66,11 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
                               @Param("isActive") Integer isActive,
                               @Param("userId") Integer userId, Pageable pageable);
 
+    @Query(value = "SELECT p FROM Post p WHERE p.isActive = :isActive AND p.moderationStatus = :status AND p.user.id = :userId AND p.time < CURRENT_TIME ORDER BY p.time")
+    List<Post> findAllMyPosts(@Param("status") ModerationStatus status,
+                              @Param("isActive") Integer isActive,
+                              @Param("userId") Integer userId);
+
     @Query(value = "SELECT COUNT(p) FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'NEW'")
     int findCountAllPostsForModerator(@Param("email") String email);
 

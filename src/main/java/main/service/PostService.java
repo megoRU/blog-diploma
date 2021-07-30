@@ -216,12 +216,12 @@ public class PostService {
             post.setTitle(createPost.getTitle());
             post.setText(createPost.getText());
 
-            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").get(0).getValue().equals("YES")
+            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")
                     && user.getIsModerator() == 0) {
                 post.setModerationStatus(ModerationStatus.NEW);
             }
 
-            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").get(0).getValue().equals("NO") && createPost.getActive() == 1) {
+            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO") && createPost.getActive() == 1) {
                 post.setModerationStatus(ModerationStatus.ACCEPTED);
             }
 

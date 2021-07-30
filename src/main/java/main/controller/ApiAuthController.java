@@ -58,7 +58,7 @@ public class ApiAuthController {
     @PostMapping(value = "/api/auth/register")
     private ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         //TODO: Работает но фронт же должен "сам" проверяет это
-        if (globalSettingsRepository.getSettingsById("MULTIUSER_MODE").get(0).getValue().equals("YES")) {
+        if (globalSettingsRepository.getSettingsById("MULTIUSER_MODE").getValue().equals("YES")) {
            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
