@@ -1,15 +1,17 @@
 package main.controller;
 
 import lombok.RequiredArgsConstructor;
+import main.dto.request.SettingsRequest;
 import main.dto.responses.CalendarResponseList;
 import main.dto.responses.InitResponse;
 import main.dto.responses.SettingsResponse;
 import main.service.CalendarService;
 import main.service.SettingsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +24,18 @@ public class ApiGeneralController {
     @GetMapping(value = "/api/settings")
     private ResponseEntity<SettingsResponse> settings() {
         return ResponseEntity.ok(settingsService.getGlobalSettings());
+    }
+
+    @PutMapping(value = "/api/settings")
+    private ResponseEntity<?> editSettings(
+            Principal principal,
+            @RequestBody SettingsRequest settingsRequest) {
+
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return settingsService.editSettings(settingsRequest);
     }
 
     @GetMapping(value = "/api/init")

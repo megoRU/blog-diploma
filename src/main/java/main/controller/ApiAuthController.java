@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import main.dto.request.LoginRequest;
 import main.dto.request.RegistrationRequest;
 import main.dto.responses.ResultResponse;
+import main.repositories.GlobalSettingsRepository;
 import main.service.CaptchaService;
 import main.service.CheckService;
 import main.service.LoginService;
@@ -27,6 +28,7 @@ public class ApiAuthController {
     private final CheckService checkService;
     private final CaptchaService captchaService;
     private final RegistrationService registrationService;
+    private final GlobalSettingsRepository globalSettingsRepository;
 
     @GetMapping("/api/auth/check")
     private ResponseEntity<?> check(Principal principal) {
@@ -55,6 +57,11 @@ public class ApiAuthController {
 
     @PostMapping(value = "/api/auth/register")
     private ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
+        //TODO: Работает но фронт же должен "сам" проверяет это
+        if (globalSettingsRepository.getSettingsById("MULTIUSER_MODE").get(0).getValue().equals("YES")) {
+           return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         return registrationService.registration(registrationRequest);
     }
 

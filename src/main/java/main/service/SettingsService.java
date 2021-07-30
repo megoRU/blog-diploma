@@ -1,9 +1,13 @@
 package main.service;
 
 import lombok.RequiredArgsConstructor;
+import main.dto.request.SettingsRequest;
+import main.dto.responses.ResultResponse;
 import main.dto.responses.SettingsResponse;
 import main.model.GlobalSettings;
 import main.repositories.GlobalSettingsRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,5 +26,13 @@ public class SettingsService {
                 list.get(0).getValue().equals("YES"),
                 list.get(1).getValue().equals("YES"),
                 list.get(2).getValue().equals("YES"));
+    }
+
+    public ResponseEntity<?> editSettings(SettingsRequest settingsRequest) {
+        globalSettingsRepository.insertSettings("MULTIUSER_MODE", settingsRequest.isMultiuseMode() ? "YES" : "NO");
+        globalSettingsRepository.insertSettings("POST_PREMODERATION", settingsRequest.isPostPremoderation() ? "YES" : "NO");
+        globalSettingsRepository.insertSettings("STATISTICS_IS_PUBLIC", settingsRequest.isStatisticIsPublic() ? "YES" : "NO");
+
+        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
 }

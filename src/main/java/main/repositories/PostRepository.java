@@ -26,10 +26,10 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME ORDER BY p.time ASC")
     Page<Post> findAllPostsByTime(Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT p FROM Post p, PostComment pc WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME ORDER BY p.comment.size DESC")
+    @Query(value = "SELECT DISTINCT p FROM Post p, PostComment pc WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME ORDER BY size(p.comment) DESC")
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT p FROM Post p, PostVote pv WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME ORDER BY p.like.size DESC")
+    @Query(value = "SELECT DISTINCT p FROM Post p, PostVote pv WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME ORDER BY size(p.like) DESC")
     Page<Post> findAllPostsByVotesDesc(Pageable pageable);
 
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.text LIKE %:query% AND p.time < CURRENT_TIME ORDER BY p.time DESC")

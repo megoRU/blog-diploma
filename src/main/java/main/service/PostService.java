@@ -31,6 +31,7 @@ public class PostService {
     private final CommentsRepository commentsRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final GlobalSettingsRepository globalSettingsRepository;
     private static final String dateStart = " 00:00:00";
     private static final String dateEnd = " 23:59:59";
     private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
@@ -210,7 +211,16 @@ public class PostService {
             post.setTime(LocalDateTime.ofEpochSecond(createPost.getTimestamp(), 0, ZoneOffset.UTC));
             post.setTitle(createPost.getTitle());
             post.setText(createPost.getText());
-            post.setModerationStatus(ModerationStatus.NEW);
+
+            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").get(0).getValue().equals("YES")
+                    && user.getIsModerator() == 0) {
+                post.setModerationStatus(ModerationStatus.NEW);
+            }
+
+            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").get(0).getValue().equals("NO") && createPost.getActive() == 1) {
+                post.setModerationStatus(ModerationStatus.ACCEPTED);
+            }
+
             post.setModeratorId(null);
             postRepository.save(post);
 
