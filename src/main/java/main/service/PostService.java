@@ -5,6 +5,7 @@ import main.dto.enums.PostErrors;
 import main.dto.enums.ReactionsForPost;
 import main.dto.request.CommentRequest;
 import main.dto.request.CreatePost;
+import main.dto.request.PostModerationRequest;
 import main.dto.request.ReactionRequest;
 import main.dto.responses.*;
 import main.model.*;
@@ -116,6 +117,9 @@ public class PostService {
             postUser = postRepository.findPostByIdForUser(id, userService.getCurrentUser().getId());
             if (userService.getCurrentUser().getIsModerator() == 1) {
                 Post postByIdForModerator = postRepository.findPostByIdForModerator(id);
+                if (postByIdForModerator == null) {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
                 return postResponse(postByIdForModerator, id);
             }
         }
@@ -248,13 +252,13 @@ public class PostService {
     public ResponseEntity<?> editPost(int id, Principal principal, CreatePost createPost) {
         Map<PostErrors, String> list = new HashMap<>();
 
-        Post post = postRepository.findPostByIdForUser(id, userService.getCurrentUser().getId());
+        Post post = postRepository.findPostByIdForModer(id);
 
         if (post == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        if (post.getUser().getId() != userService.getCurrentUser().getId()) {
+        if (post.getUser().getId() != userService.getCurrentUser().getId() && userService.getCurrentUser().getIsModerator() == 0) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -277,9 +281,14 @@ public class PostService {
             datePost = dateNow;
         }
 
-        if (userService.getCurrentUser().getIsModerator() == 0) {
+        if (userService.getCurrentUser().getIsModerator() == 0
+                && globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")) {
             postRepository.updatePost(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
-                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC), ModerationStatus.NEW);
+                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC), ModerationStatus.NEW, null);
+        } else if (userService.getCurrentUser().getIsModerator() == 0
+                && globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO")) {
+            postRepository.updatePost(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
+                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC), ModerationStatus.ACCEPTED, null);
         } else {
             postRepository.updatePostForModerator(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
                     LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
@@ -357,5 +366,35 @@ public class PostService {
         commentsRepository.save(postComment);
 
         return new ResponseEntity<>(new CommentResponse(postComment.getId()), HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> postModeration(PostModerationRequest postModerationRequest) {
+        if (userService.getCurrentUser().getIsModerator() == 0) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        Post post = postRepository.findPostByIdForModerator(postModerationRequest.getPostId());
+
+        if (post != null) {
+            try {
+                switch (postModerationRequest.getDecision()) {
+                    case "accept" -> {
+                        post.setModerationStatus(ModerationStatus.ACCEPTED);
+                        post.setModeratorId(userService.getCurrentUser().getId());
+                        postRepository.save(post);
+                        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+                    }
+                    case "decline" -> {
+                        post.setModerationStatus(ModerationStatus.DECLINED);
+                        post.setModeratorId(userService.getCurrentUser().getId());
+                        postRepository.save(post);
+                        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
     }
 }

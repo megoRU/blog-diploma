@@ -54,6 +54,9 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(value = "SELECT p FROM Post p WHERE p.id = :id AND p.user.id = :userId")
     Post findPostByIdForUser(@Param("id") int id, @Param("userId") int userId);
 
+    @Query(value = "SELECT p FROM Post p WHERE p.id = :id")
+    Post findPostByIdForModer(@Param("id") int id);
+
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = :status AND p.moderatorId = :moderatorId AND p.time < CURRENT_TIME ORDER BY p.time")
     Page<Post> findAllPostForModerator(@Param("status") ModerationStatus status, @Param("moderatorId") Integer moderatorId, Pageable pageable);
 
@@ -76,13 +79,20 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE Post p SET p.text = :text, p.title = :title, p.isActive = :active, p.time = :time, p.moderationStatus = :status WHERE p.id = :id")
+    @Query(value = "UPDATE Post p SET " +
+            "p.text = :text, " +
+            "p.title = :title, " +
+            "p.isActive = :active, " +
+            "p.time = :time, " +
+            "p.moderationStatus = :status, " +
+            "p.moderatorId = :moderatorId WHERE p.id = :id")
     void updatePost(@Param("id") Integer id,
                     @Param("title") String title,
                     @Param("text") String text,
                     @Param("active") Integer active,
                     @Param("time") LocalDateTime time,
-                    @Param("status") ModerationStatus status);
+                    @Param("status") ModerationStatus status,
+                    @Param("moderatorId") Integer moderatorId);
 
     @Modifying
     @Transactional

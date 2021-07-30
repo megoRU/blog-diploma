@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import main.dto.enums.ReactionsForPost;
 import main.dto.request.CommentRequest;
 import main.dto.request.CreatePost;
+import main.dto.request.PostModerationRequest;
 import main.dto.request.ReactionRequest;
 import main.dto.responses.PostsResponse;
 import main.dto.responses.TagsResponseList;
@@ -133,4 +134,11 @@ public class ApiPostController {
         return postService.addComment(commentRequest);
     }
 
+    @PostMapping("/api/moderation")
+    private ResponseEntity<?> postModeration(@RequestBody PostModerationRequest postModerationRequest, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return postService.postModeration(postModerationRequest);
+    }
 }
