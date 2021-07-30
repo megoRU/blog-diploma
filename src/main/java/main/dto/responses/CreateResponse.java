@@ -9,12 +9,12 @@ import java.util.Map;
 @Setter
 @Getter
 @NoArgsConstructor
-public class CreateResponse<T> {
+public class CreateResponse<T extends Enum<T>> {
 
     private boolean result;
-    private Map<Class<T>, String> errors;
+    private Map<Enum<T>, String> errors;
 
-    public CreateResponse(boolean result, Map<Class<T>, String> errors) {
+    public CreateResponse(boolean result, Map<Enum<T>, String> errors) {
         this.result = result;
         this.errors = errors;
     }

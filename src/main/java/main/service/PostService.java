@@ -3,6 +3,7 @@ package main.service;
 import lombok.RequiredArgsConstructor;
 import main.dto.enums.PostErrors;
 import main.dto.enums.ReactionsForPost;
+import main.dto.request.CommentRequest;
 import main.dto.request.CreatePost;
 import main.dto.request.ReactionRequest;
 import main.dto.responses.*;
@@ -199,12 +200,12 @@ public class PostService {
     public ResponseEntity<?> createPost(CreatePost createPost) {
         Map<PostErrors, String> list = new HashMap<>();
 
-        if (createPost.getText().length() < 3 || createPost.getText().length() > 50) {
-            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+        if (createPost.getTitle().length() < 3) {
+            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
         }
 
-        if (createPost.getTitle().length() < 3 || createPost.getTitle().length() > 50) {
-            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+        if (createPost.getText().length() < 50) {
+            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
         }
 
         if (list.isEmpty()) {
@@ -257,12 +258,12 @@ public class PostService {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        if (createPost.getText().length() < 3 || createPost.getText().length() > 50) {
-            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+        if (createPost.getTitle().length() < 3) {
+            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
         }
 
-        if (createPost.getTitle().length() < 3 || createPost.getTitle().length() > 50) {
-            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+        if (createPost.getText().length() < 50) {
+            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
         }
 
         if (!list.isEmpty()) {
@@ -333,4 +334,28 @@ public class PostService {
         return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
     }
 
+    public ResponseEntity<?> addComment(CommentRequest commentRequest) {
+        Map<PostErrors, String> list = new HashMap<>();
+        Post post = postRepository.findPostById(commentRequest.getPostId());
+
+        if (post == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        //TODO: Узнать какая длинна должна быть для комментария
+        if (commentRequest.getText().length() < 3) {
+            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
+        }
+
+        PostComment postComment = new PostComment();
+        postComment.setPost(post);
+        postComment.setUser(userService.getCurrentUser());
+        postComment.setParentId(commentRequest.getParentId());
+        postComment.setText(commentRequest.getText());
+        postComment.setTime(LocalDateTime.ofEpochSecond(Instant.now().getEpochSecond(), 0, ZoneOffset.UTC));
+        commentsRepository.save(postComment);
+
+        return new ResponseEntity<>(new CommentResponse(postComment.getId()), HttpStatus.OK);
+    }
 }

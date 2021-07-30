@@ -2,6 +2,7 @@ package main.controller;
 
 import lombok.RequiredArgsConstructor;
 import main.dto.enums.ReactionsForPost;
+import main.dto.request.CommentRequest;
 import main.dto.request.CreatePost;
 import main.dto.request.ReactionRequest;
 import main.dto.responses.PostsResponse;
@@ -123,4 +124,13 @@ public class ApiPostController {
         }
         return postService.reactionToPost(reactionRequest, ReactionsForPost.DISLIKE);
     }
+
+    @PostMapping("/api/comment")
+    private ResponseEntity<?> comment(@RequestBody CommentRequest commentRequest, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return postService.addComment(commentRequest);
+    }
+
 }
