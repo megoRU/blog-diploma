@@ -1,7 +1,9 @@
 package main.controller;
 
 import lombok.RequiredArgsConstructor;
+import main.dto.enums.ReactionsForPost;
 import main.dto.request.CreatePost;
+import main.dto.request.ReactionRequest;
 import main.dto.responses.PostsResponse;
 import main.dto.responses.TagsResponseList;
 import main.service.PostService;
@@ -104,5 +106,21 @@ public class ApiPostController {
         }
 
         return postService.editPost(ID, principal, createPost);
+    }
+
+    @PostMapping("/api/post/like")
+    private ResponseEntity<?> likeToPost(@RequestBody ReactionRequest reactionRequest, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return postService.reactionToPost(reactionRequest, ReactionsForPost.LIKE);
+    }
+
+    @PostMapping("/api/post/dislike")
+    private ResponseEntity<?> dislikeToPost(@RequestBody ReactionRequest reactionRequest, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return postService.reactionToPost(reactionRequest, ReactionsForPost.DISLIKE);
     }
 }

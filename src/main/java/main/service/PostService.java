@@ -2,7 +2,9 @@ package main.service;
 
 import lombok.RequiredArgsConstructor;
 import main.dto.enums.PostErrors;
+import main.dto.enums.ReactionsForPost;
 import main.dto.request.CreatePost;
+import main.dto.request.ReactionRequest;
 import main.dto.responses.*;
 import main.model.*;
 import main.model.enums.ModerationStatus;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -32,6 +35,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final PostVoteRepository postVoteRepository;
     private static final String dateStart = " 00:00:00";
     private static final String dateEnd = " 23:59:59";
     private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
@@ -283,14 +287,44 @@ public class PostService {
         tags2PostRepository.deleteTagsPyPostId(id);
 
         for (String tags : createPost.getTags()) {
-                Tag tag = new Tag();
-                tag.setName(tags);
-                Tags2Post tags2Post = new Tags2Post();
-                tags2Post.setPost(post);
-                tags2Post.setTag(tagsRepository.save(tag));
-                tags2PostRepository.save(tags2Post);
+            Tag tag = new Tag();
+            tag.setName(tags);
+            Tags2Post tags2Post = new Tags2Post();
+            tags2Post.setPost(post);
+            tags2Post.setTag(tagsRepository.save(tag));
+            tags2PostRepository.save(tags2Post);
         }
 
         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
+
+    public ResponseEntity<?> reactionToPost(ReactionRequest reactionRequest, ReactionsForPost reactionsForPost) {
+        PostVote postVote = postVoteRepository.getPostVoteByIdAndByUserId(reactionRequest.getPostId(), userService.getCurrentUser().getId());
+
+        if (postVote == null) {
+            postVote = new PostVote();
+            Post post = postRepository.findPostById(reactionRequest.getPostId());
+            User user = userService.getCurrentUser();
+            postVote.setPost(post);
+            postVote.setUser(user);
+            postVote.setTime(LocalDateTime.ofEpochSecond(Instant.now().getEpochSecond(), 0, ZoneOffset.UTC));
+            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+        }
+
+        if (reactionsForPost.equals(ReactionsForPost.LIKE)) {
+            if (postVote.getValue() != 1) {
+                postVote.setValue(1);
+                postVoteRepository.save(postVote);
+                return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+            }
+        } else {
+            if (postVote.getValue() != -1) {
+                postVote.setValue(-1);
+                postVoteRepository.save(postVote);
+                return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
+    }
+
 }
