@@ -308,6 +308,12 @@ public class PostService {
             postVote.setPost(post);
             postVote.setUser(user);
             postVote.setTime(LocalDateTime.ofEpochSecond(Instant.now().getEpochSecond(), 0, ZoneOffset.UTC));
+            if (reactionsForPost.equals(ReactionsForPost.LIKE)) {
+                postVote.setValue(1);
+            } else {
+                postVote.setValue(-1);
+            }
+            postVoteRepository.save(postVote);
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 

@@ -24,11 +24,15 @@ public class TagService {
         } else {
             listTags = tagsRepository.getRecentTags();
         }
-        double normParam = (double) listTags.get(0).getCount() / listTags.size();
+        if (!listTags.isEmpty()) {
+            double normParam = (double) listTags.get(0).getCount() / listTags.size();
 
-        for (TagsResponseImpl t : listTags) {
-            tagsResponseLists.add(new TagsResponse(t.getName(), String.valueOf((double) t.getCount() / listTags.size() / normParam)));
+            for (TagsResponseImpl t : listTags) {
+                tagsResponseLists.add(new TagsResponse(t.getName(), String.valueOf((double) t.getCount() / listTags.size() / normParam)));
+            }
+            return new TagsResponseList(tagsResponseLists);
         }
         return new TagsResponseList(tagsResponseLists);
+
     }
 }

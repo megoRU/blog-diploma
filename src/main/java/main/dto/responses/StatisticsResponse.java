@@ -1,11 +1,13 @@
 package main.dto.responses;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
 public class StatisticsResponse {
 
@@ -14,20 +16,4 @@ public class StatisticsResponse {
     private long dislikesCount;
     private long viewsCount;
     private long firstPublication;
-
-    public StatisticsResponse(long postsCount, long likesCount, long dislikesCount, long viewsCount, long firstPublication) {
-        this.postsCount = postsCount;
-        this.likesCount = likesCount;
-        this.dislikesCount = dislikesCount;
-        this.viewsCount = viewsCount;
-        this.firstPublication = firstPublication;
-    }
-
-    public StatisticsResponse(long number) {
-        this.postsCount = number;
-        this.likesCount = number;
-        this.dislikesCount = number;
-        this.viewsCount = number;
-        this.firstPublication = number;
-    }
 }
