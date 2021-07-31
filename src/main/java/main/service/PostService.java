@@ -23,6 +23,7 @@ import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,12 +35,10 @@ public class PostService {
     private final TagsRepository tagsRepository;
     private final Tags2PostRepository tags2PostRepository;
     private final CommentsRepository commentsRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
     private final GlobalSettingsRepository globalSettingsRepository;
     private final PostVoteRepository postVoteRepository;
-    private static final String dateStart = " 00:00:00";
-    private static final String dateEnd = " 23:59:59";
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
@@ -88,8 +87,11 @@ public class PostService {
     public PostsResponse getPostsByDate(int offset, int limit, String date) {
         if (date.matches(dateRegex)) {
             Pageable pageable = PageRequest.of(offset / limit, limit);
-            Page<Post> postsPage = postRepository.findAllPostsByDate(date + dateStart, date + dateEnd, pageable);
 
+            LocalDateTime first = LocalDateTime.parse(date + " 00:00", formatter);
+            LocalDateTime second = LocalDateTime.parse(date + " 23:59", formatter);
+
+            Page<Post> postsPage = postRepository.findAllPostsByDate(first, second, pageable);
             List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
             return new PostsResponse(postsPage.getNumberOfElements(), postResponseList);
@@ -116,6 +118,9 @@ public class PostService {
         if (principal != null) {
             postUser = postRepository.findPostByIdForUser(id, userService.getCurrentUser().getId());
             if (userService.getCurrentUser().getIsModerator() == 1) {
+                if (postUser != null) {
+                    return postResponse(postUser, id);
+                }
                 Post postByIdForModerator = postRepository.findPostByIdForModerator(id);
                 if (postByIdForModerator == null) {
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -130,7 +135,7 @@ public class PostService {
 
         User user = null;
         try {
-            user = userRepository.findByEmail(principal.getName()).get();
+            user = userService.getCurrentUser();
         } catch (Exception e) {
             System.out.println("user not found");
         }
@@ -179,21 +184,12 @@ public class PostService {
     public ResponseEntity<?> getMyPosts(int offset, int limit, String status) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Post> postsPage;
-
-        switch (status) {
-            case "INACTIVE":
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 0, userService.getCurrentUser().getId(), pageable);
-                break;
-            case "PENDING":
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
-                break;
-            case "DECLINED":
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
-                break;
-            default:
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
-        }
+        Page<Post> postsPage = switch (status) {
+            case "INACTIVE" -> postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
+            case "PENDING" -> postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
+            case "DECLINED" -> postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
+            default -> postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
+        };
 
         List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
@@ -224,10 +220,10 @@ public class PostService {
             if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")
                     && user.getIsModerator() == 0) {
                 post.setModerationStatus(ModerationStatus.NEW);
-            }
-
-            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO") && createPost.getActive() == 1) {
+            } else if (user.getIsModerator() == 1 && createPost.getActive() == 1) {
                 post.setModerationStatus(ModerationStatus.ACCEPTED);
+            } else {
+                post.setModerationStatus(ModerationStatus.NEW);
             }
 
             post.setModeratorId(null);

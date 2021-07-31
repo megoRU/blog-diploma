@@ -60,8 +60,8 @@ public class PostResponseForList {
                 .replaceAll("<.*?>", "")
                 .replaceAll("&nbsp;", " ");
 
-        if (announce.length() > 400) {
-            return announce.substring(0, 400) + "...";
+        if (announce.length() >= 150) {
+            return announce.substring(0, 150) + "...";
         }
         return announce;
     }
