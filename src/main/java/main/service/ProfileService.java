@@ -126,12 +126,6 @@ public class ProfileService {
                     "/" + resultPath + "/" + profileImage + ".png",
                     userService.getCurrentUser().getId());
 
-        } else if (password == null && file != null) {
-            userRepository.editPhoto(
-                    name,
-                    email,
-                    "/" + resultPath + "/" + profileImage + ".png",
-                    userService.getCurrentUser().getId());
         } else {
             userRepository.editPhoto(
                     name,
