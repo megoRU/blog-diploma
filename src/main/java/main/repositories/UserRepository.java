@@ -15,6 +15,9 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
 
+    @Query(value = "SELECT u FROM User u WHERE u.email = :email")
+    User findByEmailForProfile(String email);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE User u SET u.name = :name, u.email = :email, u.password = :password, u.photo = :photo WHERE u.id = :id")
@@ -28,9 +31,9 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     @Transactional
     @Query(value = "UPDATE User u SET u.name = :name, u.email = :email, u.photo = :photo WHERE u.id = :id")
     void editNameEmailPhoto(@Param("name") String name,
-                           @Param("email") String email,
-                           @Param("photo") String photo,
-                           @Param("id") int id);
+                            @Param("email") String email,
+                            @Param("photo") String photo,
+                            @Param("id") int id);
 
     @Modifying
     @Transactional

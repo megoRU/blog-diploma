@@ -1,8 +1,11 @@
 package main.service;
 
 import lombok.AllArgsConstructor;
+import main.dto.enums.ProfileErrors;
 import main.dto.request.ProfileRequest;
+import main.dto.responses.CreateResponse;
 import main.dto.responses.ResultResponse;
+import main.model.User;
 import main.repositories.UserRepository;
 import main.security.UserService;
 import org.imgscalr.Scalr;
@@ -21,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -32,6 +37,13 @@ public class ProfileService {
 
     public ResponseEntity<?> editProfile(ProfileRequest profileRequest, Principal principal) throws Exception {
         System.out.println(profileRequest.toString());
+
+        Map<ProfileErrors, String> list = new HashMap<>();
+        checks(null, profileRequest.getName(), profileRequest.getEmail(), profileRequest.getPassword(), list);
+
+        if (!list.isEmpty()) {
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+        }
 
 
         if (profileRequest.getPassword() == null
@@ -85,24 +97,25 @@ public class ProfileService {
         String resultPath = null;
         if (file != null) {
             profileImage = String.valueOf(userService.getCurrentUser().getId());
-            resultPath = "/profile_avatars/" + userService.getCurrentUser().getId();
-
-            File directory = new File(resultPath);
+            resultPath = "profile_avatars/" + userService.getCurrentUser().getId();
             Path uploadDir = Paths.get(resultPath);
-            System.out.println(Files.exists(uploadDir));
             if (!Files.exists(uploadDir)) {
-
-//                new File(resultPath).mkdir();
-
                 Files.createDirectories(uploadDir);
             }
             try {
                 BufferedImage resized = resizeImage(file.getInputStream(), 36, 36);
-                File newFileScalr = new File(resultPath + profileImage + ".png");
+                File newFileScalr = new File(resultPath + "/" + profileImage + ".png");
                 ImageIO.write(resized, "png", newFileScalr);
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
+        }
+
+        Map<ProfileErrors, String> list = new HashMap<>();
+        checks(file, name, email, password, list);
+
+        if (!list.isEmpty()) {
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
         }
 
         if (password != null && file != null) {
@@ -110,20 +123,20 @@ public class ProfileService {
                     name,
                     email,
                     new BCryptPasswordEncoder(12).encode(password),
-                    resultPath + profileImage + ".png",
+                    "/" + resultPath + "/" + profileImage + ".png",
                     userService.getCurrentUser().getId());
 
         } else if (password == null && file != null) {
             userRepository.editPhoto(
                     name,
                     email,
-                    resultPath + profileImage + ".png",
+                    "/" + resultPath + "/" + profileImage + ".png",
                     userService.getCurrentUser().getId());
         } else {
             userRepository.editPhoto(
                     name,
                     email,
-                    resultPath + profileImage + ".png",
+                    "/" + resultPath + profileImage + ".png",
                     userService.getCurrentUser().getId());
         }
 
@@ -136,4 +149,27 @@ public class ProfileService {
         BufferedImage image = ImageIO.read(inputStream);
         return Scalr.resize(image, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_TO_WIDTH, newWidth, newHeight);
     }
+
+
+    private Map<ProfileErrors, String> checks(MultipartFile file, String name, String email, String password, Map<ProfileErrors, String> list) {
+
+        if (!name.matches("[A-Za-zА-Яа-я0-9]+")) {
+            list.put(ProfileErrors.NAME, ProfileErrors.NAME.getErrors());
+        }
+
+        if (file != null && file.getSize() > 5242880) {
+            list.put(ProfileErrors.PHOTO, ProfileErrors.PHOTO.getErrors());
+        }
+
+        User userEmail = userRepository.findByEmailForProfile(email);
+        if (userEmail != null && userEmail.getId() != userService.getCurrentUser().getId()) {
+            list.put(ProfileErrors.EMAIL, ProfileErrors.EMAIL.getErrors());
+        }
+
+        if (password != null && password.length() < 6) {
+            list.put(ProfileErrors.PASSWORD, ProfileErrors.PASSWORD.getErrors());
+        }
+        return list;
+    }
+
 }
