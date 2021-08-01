@@ -136,7 +136,7 @@ public class ProfileService {
             userRepository.editPhoto(
                     name,
                     email,
-                    "/" + resultPath + profileImage + ".png",
+                    "/" + resultPath + "/" + profileImage + ".png",
                     userService.getCurrentUser().getId());
         }
 
