@@ -7,7 +7,7 @@ import main.dto.responses.CalendarResponseList;
 import main.dto.responses.InitResponse;
 import main.dto.responses.SettingsResponse;
 import main.service.CalendarService;
-import main.service.ProfileService;
+import main.service.ImageService;
 import main.service.SettingsService;
 import main.service.StatisticsService;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ public class ApiGeneralController {
     private final InitResponse initResponse;
     private final CalendarService calendarService;
     private final StatisticsService statisticsService;
-    private final ProfileService profileService;
+    private final ImageService imageService;
 
     @GetMapping(value = "/api/settings")
     private ResponseEntity<SettingsResponse> settings() {
@@ -80,7 +80,7 @@ public class ApiGeneralController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        return profileService.editProfileMultipart(photo, name, email, password, removePhoto, principal);
+        return imageService.editProfileImage(photo, name, email, password, removePhoto, principal);
     }
 
     @PostMapping(value = "/api/profile/my", consumes = {"application/json"})
@@ -90,8 +90,18 @@ public class ApiGeneralController {
         if (principal == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return profileService.editProfile(profileRequest, principal);
+        return imageService.editProfile(profileRequest, principal);
+    }
 
+    @PostMapping(value = "/api/image", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> uploadImage(
+            @RequestPart(value = "image", required = false) MultipartFile photo,
+            Principal principal) throws Exception {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return imageService.uploadImage(photo, principal);
     }
 
 }

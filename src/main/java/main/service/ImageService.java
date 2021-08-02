@@ -20,16 +20,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
 @AllArgsConstructor
-public class ProfileService {
+public class ImageService {
 
     private final UserService userService;
     private final UserRepository userRepository;
@@ -38,7 +40,7 @@ public class ProfileService {
     public ResponseEntity<?> editProfile(ProfileRequest profileRequest, Principal principal) throws Exception {
 
         Map<ProfileErrors, String> list = new HashMap<>();
-        checks(null, profileRequest.getName(), profileRequest.getEmail(), profileRequest.getPassword(), list);
+        profileChecks(null, profileRequest.getName(), profileRequest.getEmail(), profileRequest.getPassword(), list);
 
         if (!list.isEmpty()) {
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
@@ -89,7 +91,7 @@ public class ProfileService {
         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> editProfileMultipart(MultipartFile photo, String name, String email, String password, String removePhoto, Principal principal) throws IOException {
+    public ResponseEntity<?> editProfileImage(MultipartFile photo, String name, String email, String password, String removePhoto, Principal principal) throws IOException {
 
 
         String profileImage = null;
@@ -111,7 +113,7 @@ public class ProfileService {
         }
 
         Map<ProfileErrors, String> list = new HashMap<>();
-        checks(photo, name, email, password, list);
+        profileChecks(photo, name, email, password, list);
 
         if (!list.isEmpty()) {
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
@@ -137,14 +139,68 @@ public class ProfileService {
 
     }
 
+    public ResponseEntity<?> uploadImage(MultipartFile photo, Principal principal) throws IOException {
+        Map<ProfileErrors, String> list = new HashMap<>();
+
+        if (photo == null) {
+            list.put(ProfileErrors.IMAGE_NULL, ProfileErrors.IMAGE_NULL.getErrors());
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
+        }
+
+        if (photo.getSize() > 5242880) {
+            list.put(ProfileErrors.IMAGE, ProfileErrors.IMAGE.getErrors());
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
+        }
+
+        String fileName = photo.getOriginalFilename().toLowerCase(Locale.ROOT)
+                .substring(photo.getOriginalFilename().lastIndexOf('.') + 1, photo.getOriginalFilename().length());
+
+        if (!fileName.equals("png") && !fileName.equals("jpg")) {
+            list.put(ProfileErrors.IMAGE_BAD_FORMAT, ProfileErrors.IMAGE_BAD_FORMAT.getErrors());
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
+        } else {
+            StringBuilder hashPath = new StringBuilder();
+            String hash = toHexString(photo.getBytes());
+
+            for (int i = 0; i < 3; i++) {
+                hashPath.append(hash, 20 + i, 22 + i).append("/");
+            }
+
+            String resultPath = "upload/" + hashPath;
+            Path uploadDir = Paths.get(resultPath);
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+            try {
+                File path = new File(resultPath + "/" + photo.getOriginalFilename()
+                        .substring(0, photo.getOriginalFilename().lastIndexOf('.')) + ".png");
+
+                BufferedImage bufferedImage = ImageIO.read(photo.getInputStream());
+                ImageIO.write(bufferedImage, "png", path);
+                return new ResponseEntity<>("\\" + path.getPath(), HttpStatus.OK);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     private BufferedImage resizeImage(InputStream inputStream, int newWidth, int newHeight) throws
             IOException {
         BufferedImage image = ImageIO.read(inputStream);
         return Scalr.resize(image, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_TO_WIDTH, newWidth, newHeight);
     }
 
+    private String toHexString(byte[] hash) {
+        BigInteger number = new BigInteger(1, hash);
+        StringBuilder hexString = new StringBuilder(number.toString(16));
+        while (hexString.length() < 32) {
+            hexString.append('0');
+        }
+        return hexString.toString().replaceAll("[0-9]+", "");
+    }
 
-    private Map<ProfileErrors, String> checks(MultipartFile file, String name, String email, String password, Map<ProfileErrors, String> list) {
+    private Map<ProfileErrors, String> profileChecks(MultipartFile file, String name, String email, String password, Map<ProfileErrors, String> list) {
 
         if (!name.matches("[A-Za-zА-Яа-я0-9]+")) {
             list.put(ProfileErrors.NAME, ProfileErrors.NAME.getErrors());
