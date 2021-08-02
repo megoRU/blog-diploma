@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService {
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
     private final PostRepository postRepository;
     private final TagsRepository tagsRepository;
     private final Tags2PostRepository tags2PostRepository;
@@ -38,8 +40,6 @@ public class PostService {
     private final UserService userService;
     private final GlobalSettingsRepository globalSettingsRepository;
     private final PostVoteRepository postVoteRepository;
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final String dateRegex = "\\d.+-\\d{2}-\\d{2}";
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);

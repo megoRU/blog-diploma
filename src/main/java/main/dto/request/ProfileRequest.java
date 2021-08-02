@@ -1,12 +1,12 @@
 package main.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
-@Data
 public class ProfileRequest {
 
     private String photo;
@@ -14,5 +14,4 @@ public class ProfileRequest {
     private String email;
     private String password;
     private int removePhoto;
-
 }

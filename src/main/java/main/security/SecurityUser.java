@@ -16,6 +16,17 @@ public class SecurityUser implements UserDetails {
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
 
+    public static UserDetails fromUser(User user) {
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                true,
+                true,
+                true,
+                true,
+                user.getRoles().getAuthorities());
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -49,16 +60,5 @@ public class SecurityUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public static UserDetails fromUser(User user) {
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                true,
-                true,
-                true,
-                true,
-                user.getRoles().getAuthorities());
     }
 }

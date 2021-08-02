@@ -68,19 +68,9 @@ public class ApiGeneralController {
         return statisticsService.getAllStatistics(principal);
     }
 
-//    @PostMapping(value = "/api/profile/my")
-//    private ResponseEntity<?> editProfile(@ModelAttribute ProfileRequest profileRequest, Principal principal) throws Exception {
-//        if (principal == null) {
-//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-//        }
-//
-//        return profileService.editProfile(profileRequest, principal);
-//    }
-
-
     @PostMapping(value = "/api/profile/my", consumes = {"multipart/form-data"})
     public ResponseEntity<?> editProfile(
-            @RequestPart(value = "photo", required = false) MultipartFile file,
+            @RequestPart(value = "photo", required = false) MultipartFile photo,
             @RequestPart(value = "name", required = false) String name,
             @RequestPart(value = "email", required = false) String email,
             @RequestPart(value = "password", required = false) String password,
@@ -90,7 +80,7 @@ public class ApiGeneralController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        return profileService.editProfileMultipart(file, name, email, password, removePhoto, principal);
+        return profileService.editProfileMultipart(photo, name, email, password, removePhoto, principal);
     }
 
     @PostMapping(value = "/api/profile/my", consumes = {"application/json"})
@@ -100,7 +90,6 @@ public class ApiGeneralController {
         if (principal == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
         return profileService.editProfile(profileRequest, principal);
 
     }

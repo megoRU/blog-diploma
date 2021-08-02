@@ -21,27 +21,19 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE User u SET u.name = :name, u.email = :email, u.password = :password, u.photo = :photo WHERE u.id = :id")
-    void editPasswordPhoto(@Param("name") String name,
-                           @Param("email") String email,
-                           @Param("password") String password,
-                           @Param("photo") String photo,
-                           @Param("id") int id);
+    void updatePasswordPhoto(@Param("name") String name,
+                             @Param("email") String email,
+                             @Param("password") String password,
+                             @Param("photo") String photo,
+                             @Param("id") int id);
 
     @Modifying
     @Transactional
     @Query(value = "UPDATE User u SET u.name = :name, u.email = :email, u.photo = :photo WHERE u.id = :id")
-    void editNameEmailPhoto(@Param("name") String name,
-                            @Param("email") String email,
-                            @Param("photo") String photo,
-                            @Param("id") int id);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE User u SET u.name = :name, u.email = :email, u.photo = :photo WHERE u.id = :id")
-    void editPhoto(@Param("name") String name,
-                   @Param("email") String email,
-                   @Param("photo") String photo,
-                   @Param("id") int id);
+    void updateNameEmailPhoto(@Param("name") String name,
+                              @Param("email") String email,
+                              @Param("photo") String photo,
+                              @Param("id") int id);
 
     @Modifying
     @Transactional

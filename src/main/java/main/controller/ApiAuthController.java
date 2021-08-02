@@ -59,7 +59,7 @@ public class ApiAuthController {
     private ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         //TODO: Работает но фронт же должен "сам" проверяет это
         if (globalSettingsRepository.getSettingsById("MULTIUSER_MODE").getValue().equals("YES")) {
-           return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         return registrationService.registration(registrationRequest);

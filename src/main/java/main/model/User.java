@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import main.model.enums.Role;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 

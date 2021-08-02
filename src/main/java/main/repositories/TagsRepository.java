@@ -13,10 +13,10 @@ import java.util.List;
 public interface TagsRepository extends CrudRepository<Tag, Integer> {
 
     @Query(value = "SELECT t.name AS name, COUNT(t.name) AS count " +
-    "FROM Tag t " +
-    "JOIN Tags2Post tp ON tp.tag.id = t.id " +
-    "JOIN Post p ON p.id = tp.post.id " +
-    "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_DATE AND t.name LIKE %:name% GROUP BY tp.tag.id ORDER BY COUNT(t.name) DESC")
+            "FROM Tag t " +
+            "JOIN Tags2Post tp ON tp.tag.id = t.id " +
+            "JOIN Post p ON p.id = tp.post.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME AND t.name LIKE %:name% GROUP BY tp.tag.id ORDER BY COUNT(t.name) DESC")
     List<TagsResponseImpl> getTagByName(@Param("name") String name);
 
 
@@ -24,7 +24,7 @@ public interface TagsRepository extends CrudRepository<Tag, Integer> {
             "FROM Tag t " +
             "JOIN Tags2Post tp ON tp.tag.id = t.id " +
             "JOIN Post p ON p.id = tp.post.id " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_DATE GROUP BY tp.tag.name ORDER BY COUNT(t.name) DESC")
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME GROUP BY tp.tag.name ORDER BY COUNT(t.name) DESC")
     List<TagsResponseImpl> getRecentTags();
 
     @Query(value = "SELECT t.name " +

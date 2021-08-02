@@ -36,7 +36,6 @@ public class ProfileService {
 
 
     public ResponseEntity<?> editProfile(ProfileRequest profileRequest, Principal principal) throws Exception {
-        System.out.println(profileRequest.toString());
 
         Map<ProfileErrors, String> list = new HashMap<>();
         checks(null, profileRequest.getName(), profileRequest.getEmail(), profileRequest.getPassword(), list);
@@ -61,7 +60,7 @@ public class ProfileService {
                 && profileRequest.getName() != null
                 && profileRequest.getEmail() != null
                 && profileRequest.getRemovePhoto() == 1) {
-            userRepository.editNameEmailPhoto(
+            userRepository.updateNameEmailPhoto(
                     profileRequest.getName(),
                     profileRequest.getEmail(),
                     null,
@@ -72,7 +71,7 @@ public class ProfileService {
                 && profileRequest.getName() != null
                 && profileRequest.getEmail() != null
                 && profileRequest.getRemovePhoto() == 1) {
-            userRepository.editPasswordPhoto(
+            userRepository.updatePasswordPhoto(
                     profileRequest.getName(),
                     profileRequest.getEmail(),
                     new BCryptPasswordEncoder(12).encode(profileRequest.getPassword()),
@@ -90,12 +89,12 @@ public class ProfileService {
         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> editProfileMultipart(MultipartFile file, String name, String email, String password, String removePhoto, Principal principal) throws IOException {
+    public ResponseEntity<?> editProfileMultipart(MultipartFile photo, String name, String email, String password, String removePhoto, Principal principal) throws IOException {
 
 
         String profileImage = null;
         String resultPath = null;
-        if (file != null) {
+        if (photo != null) {
             profileImage = String.valueOf(userService.getCurrentUser().getId());
             resultPath = "profile_avatars/" + userService.getCurrentUser().getId();
             Path uploadDir = Paths.get(resultPath);
@@ -103,7 +102,7 @@ public class ProfileService {
                 Files.createDirectories(uploadDir);
             }
             try {
-                BufferedImage resized = resizeImage(file.getInputStream(), 36, 36);
+                BufferedImage resized = resizeImage(photo.getInputStream(), 36, 36);
                 File newFileScalr = new File(resultPath + "/" + profileImage + ".png");
                 ImageIO.write(resized, "png", newFileScalr);
             } catch (IllegalStateException e) {
@@ -112,14 +111,14 @@ public class ProfileService {
         }
 
         Map<ProfileErrors, String> list = new HashMap<>();
-        checks(file, name, email, password, list);
+        checks(photo, name, email, password, list);
 
         if (!list.isEmpty()) {
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
         }
 
-        if (password != null && file != null) {
-            userRepository.editPasswordPhoto(
+        if (password != null && photo != null) {
+            userRepository.updatePasswordPhoto(
                     name,
                     email,
                     new BCryptPasswordEncoder(12).encode(password),
@@ -127,7 +126,7 @@ public class ProfileService {
                     userService.getCurrentUser().getId());
 
         } else {
-            userRepository.editPhoto(
+            userRepository.updateNameEmailPhoto(
                     name,
                     email,
                     "/" + resultPath + "/" + profileImage + ".png",

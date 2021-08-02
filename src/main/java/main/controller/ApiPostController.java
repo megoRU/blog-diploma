@@ -106,7 +106,6 @@ public class ApiPostController {
         if (principal == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
         return postService.editPost(ID, principal, createPost);
     }
 
