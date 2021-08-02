@@ -90,11 +90,11 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
                               @Param("userId") Integer userId, Pageable pageable);
 
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = :isActive " +
-            "AND p.moderationStatus = :status OR p.moderationStatus = :status_accepted " +
+            "AND (p.moderationStatus = :statusNew OR p.moderationStatus = :statusAccepted) " +
             "AND p.user.id = :userId " +
             "AND p.time < CURRENT_TIME ORDER BY p.time")
-    Page<Post> findAllMyPosts(@Param("status") ModerationStatus status,
-                              @Param("status_accepted") ModerationStatus statusAccepted,
+    Page<Post> findAllMyPosts(@Param("statusNew") ModerationStatus statusNew,
+                              @Param("statusAccepted") ModerationStatus statusAccepted,
                               @Param("isActive") Integer isActive,
                               @Param("userId") Integer userId, Pageable pageable);
 

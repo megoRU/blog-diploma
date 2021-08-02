@@ -184,12 +184,21 @@ public class PostService {
     public ResponseEntity<?> getMyPosts(int offset, int limit, String status) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Post> postsPage = switch (status) {
-            case "INACTIVE" -> postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
-            case "PENDING" -> postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
-            case "DECLINED" -> postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
-            default -> postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
-        };
+        Page<Post> postsPage;
+
+        switch (status) {
+            case "INACTIVE":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
+                break;
+            case "PENDING":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
+                break;
+            case "DECLINED":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
+                break;
+            default:
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
+        }
 
         List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
@@ -217,10 +226,11 @@ public class PostService {
             post.setTitle(createPost.getTitle());
             post.setText(createPost.getText());
 
-            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")
-                    && user.getIsModerator() == 0) {
+            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES") && user.getIsModerator() == 0) {
                 post.setModerationStatus(ModerationStatus.NEW);
             } else if (user.getIsModerator() == 1 && createPost.getActive() == 1) {
+                post.setModerationStatus(ModerationStatus.ACCEPTED);
+            } else if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO") && createPost.getActive() == 1) {
                 post.setModerationStatus(ModerationStatus.ACCEPTED);
             } else {
                 post.setModerationStatus(ModerationStatus.NEW);

@@ -54,16 +54,22 @@ public class PostResponseForList {
         this.viewCount = post.getViewCount();
     }
 
-    private String setAnnounce(Post post) {
-        String announce = post.getText()
+    /**
+     * Исправляет баг с очень большими баблами на фронте. Да это мини костыль, но что поделать!
+     */
+    private String setAnnounce(Post post) throws ArrayIndexOutOfBoundsException {
+        if (post.getText().lastIndexOf("</div>") == -1 && post.getText().lastIndexOf(System.lineSeparator()) == -1) {
+            return post.getText()
+                    .replaceAll("<.*?>", "")
+                    .replaceAll("&nbsp;", " ")
+                    .substring(0, 90) + "...";
+        }
+
+        return post.getText().length() >= 150 ? post.getText()
                 .replaceAll("</div>", " ")
                 .replaceAll("<.*?>", "")
-                .replaceAll("&nbsp;", " ");
-
-        if (announce.length() >= 150) {
-            return announce.substring(0, 150) + "...";
-        }
-        return announce;
+                .replaceAll("&nbsp;", " ")
+                .substring(0, 150) + "..." : post.getText();
     }
 
     private long getLikeCount(Post post) {
