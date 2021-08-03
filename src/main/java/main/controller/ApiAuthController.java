@@ -3,12 +3,10 @@ package main.controller;
 import lombok.RequiredArgsConstructor;
 import main.dto.request.LoginRequest;
 import main.dto.request.RegistrationRequest;
+import main.dto.request.RestoreRequest;
 import main.dto.responses.ResultResponse;
 import main.repositories.GlobalSettingsRepository;
-import main.service.CaptchaService;
-import main.service.CheckService;
-import main.service.LoginService;
-import main.service.RegistrationService;
+import main.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +27,7 @@ public class ApiAuthController {
     private final CaptchaService captchaService;
     private final RegistrationService registrationService;
     private final GlobalSettingsRepository globalSettingsRepository;
+    private final RestoreService restoreService;
 
     @GetMapping("/api/auth/check")
     private ResponseEntity<?> check(Principal principal) {
@@ -63,6 +62,11 @@ public class ApiAuthController {
         }
 
         return registrationService.registration(registrationRequest);
+    }
+
+    @PostMapping("/api/auth/restore")
+    private ResponseEntity<?> restore(@RequestBody RestoreRequest restoreRequest) {
+        return restoreService.restore(restoreRequest);
     }
 
 }

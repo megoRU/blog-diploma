@@ -9,11 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProfileRequest {
+public class RestoreRequest {
 
-    private String photo;
-    private String name;
     private String email;
-    private String password;
-    private int removePhoto;
 }

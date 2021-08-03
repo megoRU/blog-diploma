@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -51,16 +50,11 @@ public class RegistrationService {
             user.setName(registrationRequest.getName());
             user.setRegTime(LocalDateTime.now());
             user.setPassword(new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()));
-            user.setCode(getRandomNumber());
             userRepository.save(user);
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 
         return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
-    }
-
-    private String getRandomNumber() {
-        return String.format("%06d", new Random().nextInt(999999));
     }
 
 }

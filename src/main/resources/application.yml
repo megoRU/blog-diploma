@@ -21,6 +21,12 @@ spring:
 server:
   port: ${PORT:8080}
 
+spring.mail:
+  host: smtp.mail.ru
+  username: contact@megoru.ru
+  password: BxKY2YVj#dpCb#G
+  port: 465
+
 blog:
   title: DevPub
   subtitle: Рассказы разработчиков

@@ -38,7 +38,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE User u SET u.name = :name, u.email = :email WHERE u.id = :id")
-    void editNameAndEmail(
+    void updateNameAndEmail(
             @Param("name") String name,
             @Param("email") String email,
             @Param("id") int id);
@@ -47,9 +47,13 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE User u SET u.name = :name, u.email = :email, u.password = :password WHERE u.id = :id")
-    void editNameEmailPassword(@Param("name") String name,
-                               @Param("email") String email,
-                               @Param("password") String password,
-                               @Param("id") int id);
+    void updateNameEmailPassword(@Param("name") String name,
+                                 @Param("email") String email,
+                                 @Param("password") String password,
+                                 @Param("id") int id);
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE User u SET u.code = :code WHERE u.id = :id")
+    void updateUserCode(@Param("code") String code, @Param("id") int id);
 }

@@ -51,7 +51,7 @@ public class ImageService {
                 && profileRequest.getName() != null
                 && profileRequest.getEmail() != null
                 && profileRequest.getRemovePhoto() == 0) {
-            userRepository.editNameAndEmail(
+            userRepository.updateNameAndEmail(
                     profileRequest.getName(),
                     profileRequest.getEmail(),
                     userService.getCurrentUser().getId());
@@ -81,7 +81,7 @@ public class ImageService {
                     userService.getCurrentUser().getId());
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         } else {
-            userRepository.editNameEmailPassword(
+            userRepository.updateNameEmailPassword(
                     profileRequest.getName(),
                     profileRequest.getEmail(),
                     new BCryptPasswordEncoder(12).encode(profileRequest.getPassword()),
