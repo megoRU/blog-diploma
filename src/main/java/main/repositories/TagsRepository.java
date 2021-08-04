@@ -19,6 +19,8 @@ public interface TagsRepository extends CrudRepository<Tag, Integer> {
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME AND t.name LIKE %:name% GROUP BY tp.tag.id ORDER BY COUNT(t.name) DESC")
     List<TagsResponseImpl> getTagByName(@Param("name") String name);
 
+    @Query(value = "SELECT t FROM Tag t WHERE t.name = :name")
+    Tag getTagByName2(@Param("name") String name);
 
     @Query(value = "SELECT t.name AS name, COUNT(t.name) AS count " +
             "FROM Tag t " +
@@ -33,4 +35,13 @@ public interface TagsRepository extends CrudRepository<Tag, Integer> {
             "WHERE tp.post.id = :id")
     List<String> getTagsByPost(@Param("id") Integer id);
 
+
+    @Query(value = "SELECT t.name " +
+            "FROM Tag t " +
+            "JOIN Tags2Post tp ON tp.tag.id = t.id " +
+            "WHERE tp.post.id = :postId")
+    List<String> getTagsByPostString(@Param("postId") Integer postId);
+
+//    @Query(value = "SELECT t.id FROM Tag t WHERE t.name = :name")
+//    Integer getByName(@Param("name") String name);
 }

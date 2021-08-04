@@ -145,7 +145,7 @@ public class PostService {
 
     private ResponseEntity<?> postResponse(Post post, Integer id) {
         List<PostComment> commentsList = commentsRepository.findComments(id);
-        List<String> tagList = tagsRepository.getTagsByPost(id);
+        List<String> tagList = tagsRepository.getTagsByPostString(id);
         List<PostCommentsResponse> commentsResponseList = new ArrayList<>();
         for (PostComment c : commentsList) {
             commentsResponseList.add(new PostCommentsResponse(c));
@@ -231,12 +231,21 @@ public class PostService {
             postRepository.save(post);
 
             for (String t : createPost.getTags()) {
-                Tag tag = new Tag();
-                Tags2Post tags2Post = new Tags2Post();
-                tag.setName(t);
-                tags2Post.setPost(post);
-                tags2Post.setTag(tagsRepository.save(tag));
-                tags2PostRepository.save(tags2Post);
+                Tag getTag = tagsRepository.getTagByName2(t);
+
+                if (getTag == null) {
+                    Tag tag = new Tag();
+                    tag.setName(t);
+                    Tags2Post tags2Post = new Tags2Post();
+                    tags2Post.setPost(post);
+                    tags2Post.setTag(tagsRepository.save(tag));
+                    tags2PostRepository.save(tags2Post);
+                } else {
+                    Tags2Post tags2Post = new Tags2Post();
+                    tags2Post.setPost(post);
+                    tags2Post.setTag(tagsRepository.save(getTag));
+                    tags2PostRepository.save(tags2Post);
+                }
             }
 
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
@@ -291,15 +300,38 @@ public class PostService {
                     LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
         }
 
-        tags2PostRepository.deleteTagsPyPostId(id);
+        List<Tags2Post> tags2Posts = tags2PostRepository.getTags2Posts(id);
+        HashMap<String, Tags2Post> oldTags = new HashMap<>();
+
+        for (int i = 0; i < tags2Posts.size(); i++) {
+            oldTags.put(tags2Posts.get(i).getTag().getName(), tags2Posts.get(i));
+        }
 
         for (String tags : createPost.getTags()) {
-            Tag tag = new Tag();
-            tag.setName(tags);
-            Tags2Post tags2Post = new Tags2Post();
-            tags2Post.setPost(post);
-            tags2Post.setTag(tagsRepository.save(tag));
-            tags2PostRepository.save(tags2Post);
+            if (!oldTags.containsKey(tags)) {
+
+                Tag getTag = tagsRepository.getTagByName2(tags);
+
+                if (getTag == null) {
+                    Tag tag = new Tag();
+                    tag.setName(tags);
+                    Tags2Post tags2Post = new Tags2Post();
+                    tags2Post.setPost(post);
+                    tags2Post.setTag(tagsRepository.save(tag));
+                    tags2PostRepository.save(tags2Post);
+                } else {
+                    Tags2Post tags2Post = new Tags2Post();
+                    tags2Post.setPost(post);
+                    tags2Post.setTag(tagsRepository.save(getTag));
+                    tags2PostRepository.save(tags2Post);
+                }
+            } else {
+                oldTags.remove(tags);
+            }
+        }
+        //Удаляем только те которые убрали с поста
+        if (!oldTags.isEmpty()) {
+            oldTags.forEach((s, tags2Post) -> tags2PostRepository.deleteTags2PostById(tags2Post.getId()));
         }
 
         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);

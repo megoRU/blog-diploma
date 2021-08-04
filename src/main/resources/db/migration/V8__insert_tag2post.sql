@@ -26,19 +26,19 @@ INSERT INTO tag2post (id, post_id, tag_id)
 VALUES (9, 1, 10);
 
 INSERT INTO tag2post (id, post_id, tag_id)
-VALUES (10, 7, 12);
+VALUES (10, 7, 1);
 
 INSERT INTO tag2post (id, post_id, tag_id)
-VALUES (11, 8, 13);
+VALUES (11, 8, 2);
 
 INSERT INTO tag2post (id, post_id, tag_id)
-VALUES (12, 2, 14);
+VALUES (12, 2, 2);
 
 INSERT INTO tag2post (id, post_id, tag_id)
-VALUES (13, 9, 15);
+VALUES (13, 9, 12);
 
 INSERT INTO tag2post (id, post_id, tag_id)
-VALUES (14, 10, 16);
+VALUES (14, 10, 13);
 
 INSERT INTO tag2post (id, post_id, tag_id)
-VALUES (15, 11, 17);
+VALUES (15, 11, 2);
