@@ -87,6 +87,7 @@ create table users
     password     varchar(255) not null,
     photo        TEXT,
     reg_time     datetime(6) not null,
+    hash_time    datetime(6),
     primary key (id)
 ) ENGINE=InnoDB;
 

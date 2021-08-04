@@ -2,28 +2,31 @@ package main.service;
 
 import lombok.RequiredArgsConstructor;
 import main.dto.responses.LoginResponse;
-import main.model.User;
+import main.dto.responses.ResultResponse;
 import main.repositories.PostRepository;
-import main.repositories.UserRepository;
+import main.security.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CheckService {
 
-    private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final UserService userService;
 
     public ResponseEntity<?> getCheck(Principal principal) {
-        Optional<User> user = userRepository.findByEmail(principal.getName());
+
+        if (principal == null) {
+            return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
+        }
+
         return new ResponseEntity<>(new LoginResponse(
                 true,
-                user.get(),
+                userService.getCurrentUser(),
                 postRepository.findCountAllPostsForModerator(principal.getName())),
                 HttpStatus.OK);
     }

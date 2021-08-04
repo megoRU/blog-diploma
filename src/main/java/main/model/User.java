@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import main.model.enums.Role;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -24,6 +25,9 @@ public class User {
 
     @Column(name = "reg_time", nullable = false)
     private LocalDateTime regTime;
+
+    @Column(name = "hash_time")
+    private LocalDateTime hashTime;
 
     @Column(nullable = false)
     private String name;

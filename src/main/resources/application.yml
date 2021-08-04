@@ -5,6 +5,11 @@ spring:
     username: blog
     password:
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   flyway:
     baseline-on-migrate: true
 
@@ -16,10 +21,16 @@ spring:
 server:
   port: ${PORT:8080}
 
+spring.mail:
+  host: smtp.mail.ru
+  username: contact@megoru.ru
+  password: BxKY2YVj#dpCb#G
+  port: 465
+
 blog:
   title: DevPub
   subtitle: Рассказы разработчиков
   phone: +7 800 55-35-35
   email: blog@gmail.com
-  copyright: Иванов Иван
+  copyright: Савин Юрий
   copyrightFrom: 2021

@@ -26,8 +26,7 @@ public class UserService {
     private User getUser(String username) throws UsernameNotFoundException {
         return userRepository
                 .findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("user "
-                        + username + " " + "not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found!"));
     }
 
 }

@@ -7,6 +7,7 @@ import main.model.User;
 @Getter
 @Setter
 public class UserPostResponse {
+
     private int id;
     private String name;
     private String photo;

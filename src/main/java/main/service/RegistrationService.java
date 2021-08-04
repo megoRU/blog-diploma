@@ -1,9 +1,10 @@
 package main.service;
 
 import lombok.RequiredArgsConstructor;
+import main.dto.enums.EnumResponse;
 import main.dto.enums.RegistrationErrors;
 import main.dto.request.RegistrationRequest;
-import main.dto.responses.RegistrationResponse;
+import main.dto.responses.CreateResponse;
 import main.dto.responses.ResultResponse;
 import main.model.User;
 import main.repositories.CaptchaRepository;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -27,22 +27,22 @@ public class RegistrationService {
     private final UserRepository userRepository;
 
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
-        Map<RegistrationErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
 
         if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
-            list.put(RegistrationErrors.EMAIL, RegistrationErrors.EMAIL.getErrors());
+            list.put(EnumResponse.email.name(), RegistrationErrors.EMAIL.getErrors());
         }
 
         if (!registrationRequest.getName().matches("[A-Za-zА-Яа-я0-9]+")) {
-            list.put(RegistrationErrors.NAME, RegistrationErrors.NAME.getErrors());
+            list.put(EnumResponse.photo.name(), RegistrationErrors.NAME.getErrors());
         }
 
         if (registrationRequest.getPassword().length() < 6) {
-            list.put(RegistrationErrors.PASSWORD, RegistrationErrors.PASSWORD.getErrors());
+            list.put(EnumResponse.password.name(), RegistrationErrors.PASSWORD.getErrors());
         }
 
         if (!registrationRequest.getCaptcha().equals(captchaRepository.checkCaptcha(registrationRequest.getCaptcha_secret()))) {
-            list.put(RegistrationErrors.CAPTCHA, RegistrationErrors.CAPTCHA.getErrors());
+            list.put(EnumResponse.captcha.name(), RegistrationErrors.CAPTCHA.getErrors());
         }
 
         if (list.isEmpty()) {
@@ -51,16 +51,11 @@ public class RegistrationService {
             user.setName(registrationRequest.getName());
             user.setRegTime(LocalDateTime.now());
             user.setPassword(new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()));
-            user.setCode(getRandomNumber());
             userRepository.save(user);
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(new RegistrationResponse(false, list), HttpStatus.OK);
-    }
-
-    private String getRandomNumber() {
-        return String.format("%06d", new Random().nextInt(999999));
+        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
     }
 
 }
