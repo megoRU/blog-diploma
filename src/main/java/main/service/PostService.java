@@ -45,22 +45,12 @@ public class PostService {
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Post> postsPage;
-
-        switch (mode) {
-            case "popular":
-                postsPage = postRepository.findAllPostsByCommentsDesc(pageable);
-                break;
-            case "best":
-                postsPage = postRepository.findAllPostsByVotesDesc(pageable);
-                break;
-            case "early":
-                postsPage = postRepository.findAllPostsByTime(pageable);
-                break;
-            default:
-                postsPage = postRepository.findAllPostsByTimeDesc(pageable);
-                break;
-        }
+        Page<Post> postsPage = switch (mode) {
+            case "popular" -> postRepository.findAllPostsByCommentsDesc(pageable);
+            case "best" -> postRepository.findAllPostsByVotesDesc(pageable);
+            case "early" -> postRepository.findAllPostsByTime(pageable);
+            default -> postRepository.findAllPostsByTimeDesc(pageable);
+        };
 
         return getPosts(postsPage, postRepository.findAllPosts().size());
     }
@@ -358,7 +348,6 @@ public class PostService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        //TODO: Узнать какая длинна должна быть для комментария
         if (commentRequest.getText().length() < 3) {
             list.put(EnumResponse.text.name(), PostErrors.TEXT.getErrors());
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);

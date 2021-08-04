@@ -33,3 +33,12 @@ VALUES (11, 8, 13);
 
 INSERT INTO tag2post (id, post_id, tag_id)
 VALUES (12, 2, 14);
+
+INSERT INTO tag2post (id, post_id, tag_id)
+VALUES (13, 9, 15);
+
+INSERT INTO tag2post (id, post_id, tag_id)
+VALUES (14, 10, 16);
+
+INSERT INTO tag2post (id, post_id, tag_id)
+VALUES (15, 11, 17);

@@ -12,3 +12,6 @@ INSERT INTO tags (name) VALUES ('Отдых');
 INSERT INTO tags (name) VALUES ('java');
 INSERT INTO tags (name) VALUES ('work');
 INSERT INTO tags (name) VALUES ('work');
+INSERT INTO tags (name) VALUES ('python');
+INSERT INTO tags (name) VALUES ('фреймворк');
+INSERT INTO tags (name) VALUES ('work');
