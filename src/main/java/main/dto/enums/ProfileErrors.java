@@ -1,23 +1,15 @@
 package main.dto.enums;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public enum ProfileErrors {
 
-    @JsonProperty("email")
     EMAIL("Этот e-mail уже зарегистрирован"),
-    @JsonProperty("photo")
-    PHOTO("Фото слишком большое, нужно не более 5 Мб"),
-    @JsonProperty("name")
+    PHOTO_MAX_5MB("Фото слишком большое, нужно не более 5 Мб"),
     NAME("Имя указано неверно"),
-    @JsonProperty("password")
     PASSWORD("Пароль короче 6-ти символов"),
-    @JsonProperty("image")
-    IMAGE("Размер файла превышает допустимый размер"),
-    @JsonProperty("image")
+    PHOTO_TO_HIGH_FOR_COMMENTS("Размер файла превышает допустимый размер"),
     IMAGE_BAD_FORMAT("Формат изображения не поддерживается"),
-    @JsonProperty("image")
-    IMAGE_NULL("Вы прислали пустой файл");
+    PHOTO_NULL("Вы прислали пустой файл"),
+    IS_NOT_PHOTO("Вы прислали не фотографию");
 
     private final String errors;
 

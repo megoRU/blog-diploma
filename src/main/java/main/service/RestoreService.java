@@ -2,48 +2,96 @@ package main.service;
 
 import lombok.AllArgsConstructor;
 import main.config.MailConfig;
+import main.dto.enums.EnumResponse;
+import main.dto.enums.RegistrationErrors;
+import main.dto.request.PasswordRestoreRequest;
 import main.dto.request.RestoreRequest;
+import main.dto.responses.CreateResponse;
 import main.dto.responses.ResultResponse;
 import main.model.User;
+import main.repositories.CaptchaRepository;
 import main.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
-import java.util.Optional;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class RestoreService {
 
     private final UserRepository userRepository;
+    private final CaptchaRepository captchaRepository;
     private final MailSender mailSender;
     private final MailConfig mailConfig;
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMMM yyyy, HH:mm");
+    private final Calendar calendar = Calendar.getInstance();
 
     public ResponseEntity<?> restore(RestoreRequest restoreRequest) {
         Optional<User> email = userRepository.findByEmail(restoreRequest.getEmail());
-        System.out.println(restoreRequest.getEmail());
+
         if (email.isPresent()) {
             UUID uuid = UUID.randomUUID();
-            System.out.println(InetAddress.getLoopbackAddress().getHostAddress());
-            System.out.println();
 
-            userRepository.updateUserCode(uuid.toString().replaceAll("-", ""), email.get().getId());
+            calendar.setTime(new Date());
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
+            calendar.getTime();
+
+            userRepository.updateUserCode(uuid.toString().replaceAll("-", ""), email.get().getId(), LocalDateTime.now());
             mailSender.sendMessage(
                     email.get().getEmail(),
                     "DevPub: Запрос на восстановление пароля",
-                    "Чтобы изменить пароль перейдите по ссылке ниже: \n" +
-                    "http://" + InetAddress.getLoopbackAddress().getHostAddress() + ":" + mailConfig.getSpringPort() +
-                            "/login/change-password/" + uuid.toString().replaceAll("-", ""));
+                    "\nВы отправили запрос на восстановление пароля на сайте: " +
+                            "http://" + InetAddress.getLoopbackAddress().getHostAddress() + ":" + mailConfig.getSpringPort() +
+
+                            "\nДля того чтобы задать новый пароль, перейдите по ссылке: \n" +
+                            "http://" + InetAddress.getLoopbackAddress().getHostAddress() + ":" + mailConfig.getSpringPort() +
+                            "/login/change-password/" + uuid.toString().replaceAll("-", "")
+
+                            + "\n\nСсылка действительна до " + simpleDateFormat.format(calendar.getTime())
+                            + "\nПожалуйста, проигнорируйте данное письмо, если оно попало к Вам по ошибке." +
+                            "\nС уважением, DevPub");
 
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
-
         }
 
         return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
-
     }
 
+    public ResponseEntity<?> passwordRestore(PasswordRestoreRequest passwordRestoreRequest) {
+        User userCode = userRepository.findUserCode(passwordRestoreRequest.getCode());
+        Map<String, String> list = new HashMap<>();
+
+        if (passwordRestoreRequest.getPassword().length() < 6) {
+            list.put(EnumResponse.password.name(), RegistrationErrors.PASSWORD.getErrors());
+        }
+
+        if (userCode == null) {
+            list.put(EnumResponse.code.name(), RegistrationErrors.CODE.getErrors());
+        }
+
+        if (userCode != null && userCode.getHashTime().plusHours(1).isBefore(LocalDateTime.now())) {
+            list.put(EnumResponse.code.name(), RegistrationErrors.CODE.getErrors());
+        }
+
+        if (!passwordRestoreRequest.getCaptcha().equals(captchaRepository.checkCaptcha(passwordRestoreRequest.getCaptcha_secret()))) {
+            list.put(EnumResponse.captcha.name(), RegistrationErrors.CAPTCHA.getErrors());
+        }
+
+        if (list.isEmpty()) {
+
+            userRepository.updatePasswordAndDeleteCode(
+                    new BCryptPasswordEncoder(12).encode(passwordRestoreRequest.getPassword()),
+                    userCode.getId());
+
+            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+    }
 }

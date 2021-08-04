@@ -2,6 +2,7 @@ package main.controller;
 
 import lombok.RequiredArgsConstructor;
 import main.dto.request.LoginRequest;
+import main.dto.request.PasswordRestoreRequest;
 import main.dto.request.RegistrationRequest;
 import main.dto.request.RestoreRequest;
 import main.dto.responses.ResultResponse;
@@ -56,8 +57,7 @@ public class ApiAuthController {
 
     @PostMapping(value = "/api/auth/register")
     private ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
-        //TODO: Работает но фронт же должен "сам" проверяет это
-        if (globalSettingsRepository.getSettingsById("MULTIUSER_MODE").getValue().equals("YES")) {
+        if (globalSettingsRepository.getSettingsById("MULTIUSER_MODE").getValue().equals("NO")) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -67,6 +67,11 @@ public class ApiAuthController {
     @PostMapping("/api/auth/restore")
     private ResponseEntity<?> restore(@RequestBody RestoreRequest restoreRequest) {
         return restoreService.restore(restoreRequest);
+    }
+
+    @PostMapping("/api/auth/password")
+    private ResponseEntity<?> passwordRestore(@RequestBody PasswordRestoreRequest passwordRestoreRequest) {
+        return restoreService.passwordRestore(passwordRestoreRequest);
     }
 
 }

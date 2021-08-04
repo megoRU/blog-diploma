@@ -1,20 +1,21 @@
 package main.dto.responses;
 
-import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Map;
 
-@Setter
-@Getter
+@Data
+@Setter(AccessLevel.NONE)
 @NoArgsConstructor
-public class CreateResponse<T extends Enum<T>> {
+public class CreateResponse {
 
     private boolean result;
-    private Map<Enum<T>, String> errors;
+    private Map<String, String> errors;
 
-    public CreateResponse(boolean result, Map<Enum<T>, String> errors) {
+    public CreateResponse(boolean result, Map<String, String> errors) {
         this.result = result;
         this.errors = errors;
     }

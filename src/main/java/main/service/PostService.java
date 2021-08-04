@@ -1,6 +1,7 @@
 package main.service;
 
 import lombok.RequiredArgsConstructor;
+import main.dto.enums.EnumResponse;
 import main.dto.enums.PostErrors;
 import main.dto.enums.ReactionsForPost;
 import main.dto.request.CommentRequest;
@@ -207,14 +208,14 @@ public class PostService {
 
 
     public ResponseEntity<?> createPost(CreatePost createPost) {
-        Map<PostErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
 
         if (createPost.getTitle().length() < 3) {
-            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+            list.put(EnumResponse.title.name(), PostErrors.TITLE.getErrors());
         }
 
         if (createPost.getText().length() < 50) {
-            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+            list.put(EnumResponse.text.name(), PostErrors.TEXT.getErrors());
         }
 
         if (list.isEmpty()) {
@@ -256,7 +257,7 @@ public class PostService {
 
     //TODO: Удалять только те которых нет в createPost. Ещё время сохранения надо поправить вроде
     public ResponseEntity<?> editPost(int id, Principal principal, CreatePost createPost) {
-        Map<PostErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
 
         Post post = postRepository.findPostByIdForModer(id);
 
@@ -269,11 +270,11 @@ public class PostService {
         }
 
         if (createPost.getTitle().length() < 3) {
-            list.put(PostErrors.TITLE, PostErrors.TITLE.getErrors());
+            list.put(EnumResponse.title.name(), PostErrors.TITLE.getErrors());
         }
 
         if (createPost.getText().length() < 50) {
-            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+            list.put(EnumResponse.text.name(), PostErrors.TEXT.getErrors());
         }
 
         if (!list.isEmpty()) {
@@ -350,7 +351,7 @@ public class PostService {
     }
 
     public ResponseEntity<?> addComment(CommentRequest commentRequest) {
-        Map<PostErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
         Post post = postRepository.findPostById(commentRequest.getPostId());
 
         if (post == null) {
@@ -359,7 +360,7 @@ public class PostService {
 
         //TODO: Узнать какая длинна должна быть для комментария
         if (commentRequest.getText().length() < 3) {
-            list.put(PostErrors.TEXT, PostErrors.TEXT.getErrors());
+            list.put(EnumResponse.text.name(), PostErrors.TEXT.getErrors());
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         }
 

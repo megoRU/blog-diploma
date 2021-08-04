@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import main.dto.responses.LoginResponse;
 import main.dto.responses.ResultResponse;
 import main.repositories.PostRepository;
-import main.repositories.UserRepository;
 import main.security.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +15,9 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class CheckService {
 
-    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final UserService userService;
 
-    //TODO: Проверка на NULL User
     public ResponseEntity<?> getCheck(Principal principal) {
 
         if (principal == null) {

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -17,6 +18,14 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     @Query(value = "SELECT u FROM User u WHERE u.email = :email")
     User findByEmailForProfile(String email);
+
+    @Query(value = "SELECT u FROM User u WHERE u.code = :code")
+    User findUserCode(@Param("code") String code);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE User u SET u.password = :password, u.code = NULL, u.hashTime = NULL WHERE u.id = :userId")
+    void updatePasswordAndDeleteCode(@Param("password") String password, @Param("userId") int userId);
 
     @Modifying
     @Transactional
@@ -54,6 +63,6 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE User u SET u.code = :code WHERE u.id = :id")
-    void updateUserCode(@Param("code") String code, @Param("id") int id);
+    @Query(value = "UPDATE User u SET u.code = :code, u.hashTime = :time WHERE u.id = :id")
+    void updateUserCode(@Param("code") String code, @Param("id") int id, @Param("time") LocalDateTime time);
 }

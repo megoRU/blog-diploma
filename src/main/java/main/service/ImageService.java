@@ -1,6 +1,7 @@
 package main.service;
 
 import lombok.AllArgsConstructor;
+import main.dto.enums.EnumResponse;
 import main.dto.enums.ProfileErrors;
 import main.dto.request.ProfileRequest;
 import main.dto.responses.CreateResponse;
@@ -28,6 +29,7 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -39,13 +41,12 @@ public class ImageService {
 
     public ResponseEntity<?> editProfile(ProfileRequest profileRequest, Principal principal) throws Exception {
 
-        Map<ProfileErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
         profileChecks(null, profileRequest.getName(), profileRequest.getEmail(), profileRequest.getPassword(), list);
 
         if (!list.isEmpty()) {
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
         }
-
 
         if (profileRequest.getPassword() == null
                 && profileRequest.getName() != null
@@ -93,10 +94,10 @@ public class ImageService {
 
     public ResponseEntity<?> editProfileImage(MultipartFile photo, String name, String email, String password, String removePhoto, Principal principal) throws IOException {
 
+        String profileImage;
+        String resultPath;
 
-        String profileImage = null;
-        String resultPath = null;
-        if (photo != null) {
+        if (photo != null && (Objects.equals(photo.getContentType(), "image/png") || Objects.equals(photo.getContentType(), "image/jpeg"))) {
             profileImage = String.valueOf(userService.getCurrentUser().getId());
             resultPath = "profile_avatars/" + userService.getCurrentUser().getId();
             Path uploadDir = Paths.get(resultPath);
@@ -110,13 +111,17 @@ public class ImageService {
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
+        } else {
+            Map<String, String> list = new HashMap<>();
+            list.put(EnumResponse.photo.name(), ProfileErrors.IS_NOT_PHOTO.getErrors());
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         }
 
-        Map<ProfileErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
         profileChecks(photo, name, email, password, list);
 
         if (!list.isEmpty()) {
-            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+            return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         }
 
         if (password != null && photo != null) {
@@ -140,15 +145,15 @@ public class ImageService {
     }
 
     public ResponseEntity<?> uploadImage(MultipartFile photo, Principal principal) throws IOException {
-        Map<ProfileErrors, String> list = new HashMap<>();
+        Map<String, String> list = new HashMap<>();
 
         if (photo == null) {
-            list.put(ProfileErrors.IMAGE_NULL, ProfileErrors.IMAGE_NULL.getErrors());
+            list.put(EnumResponse.photo.name(), ProfileErrors.PHOTO_NULL.getErrors());
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         }
 
         if (photo.getSize() > 5242880) {
-            list.put(ProfileErrors.IMAGE, ProfileErrors.IMAGE.getErrors());
+            list.put(EnumResponse.photo.name(), ProfileErrors.PHOTO_MAX_5MB.getErrors());
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         }
 
@@ -156,7 +161,7 @@ public class ImageService {
                 .substring(photo.getOriginalFilename().lastIndexOf('.') + 1, photo.getOriginalFilename().length());
 
         if (!fileName.equals("png") && !fileName.equals("jpg")) {
-            list.put(ProfileErrors.IMAGE_BAD_FORMAT, ProfileErrors.IMAGE_BAD_FORMAT.getErrors());
+            list.put(EnumResponse.image.name(), ProfileErrors.IMAGE_BAD_FORMAT.getErrors());
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         } else {
             StringBuilder hashPath = new StringBuilder();
@@ -200,23 +205,23 @@ public class ImageService {
         return hexString.toString().replaceAll("[0-9]+", "");
     }
 
-    private Map<ProfileErrors, String> profileChecks(MultipartFile file, String name, String email, String password, Map<ProfileErrors, String> list) {
+    private Map<String, String> profileChecks(MultipartFile file, String name, String email, String password, Map<String, String> list) {
 
         if (!name.matches("[A-Za-zА-Яа-я0-9]+")) {
-            list.put(ProfileErrors.NAME, ProfileErrors.NAME.getErrors());
+            list.put(EnumResponse.name.name(), ProfileErrors.NAME.getErrors());
         }
 
         if (file != null && file.getSize() > 5242880) {
-            list.put(ProfileErrors.PHOTO, ProfileErrors.PHOTO.getErrors());
+            list.put(EnumResponse.photo.name(), ProfileErrors.PHOTO_MAX_5MB.getErrors());
         }
 
         User userEmail = userRepository.findByEmailForProfile(email);
         if (userEmail != null && userEmail.getId() != userService.getCurrentUser().getId()) {
-            list.put(ProfileErrors.EMAIL, ProfileErrors.EMAIL.getErrors());
+            list.put(EnumResponse.email.name(), ProfileErrors.EMAIL.getErrors());
         }
 
         if (password != null && password.length() < 6) {
-            list.put(ProfileErrors.PASSWORD, ProfileErrors.PASSWORD.getErrors());
+            list.put(EnumResponse.password.name(), ProfileErrors.PASSWORD.getErrors());
         }
         return list;
     }
