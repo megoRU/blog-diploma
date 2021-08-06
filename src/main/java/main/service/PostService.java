@@ -55,11 +55,6 @@ public class PostService {
         return getPosts(postsPage, postRepository.findAllPosts().size());
     }
 
-    private PostsResponse getPosts(Page<Post> postsPages, int size) {
-        List<PostResponseForList> postResponseList = postsPages.get().map(PostResponseForList::new).collect(Collectors.toList());
-        return new PostsResponse(size, postResponseList);
-    }
-
     public PostsResponse getPostsSearch(int offset, int limit, String query) {
         if (query.trim().equals("")) {
             Pageable pageable = PageRequest.of(offset / limit, limit);
@@ -175,21 +170,12 @@ public class PostService {
     public ResponseEntity<?> getMyPosts(int offset, int limit, String status) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Post> postsPage;
-
-        switch (status) {
-            case "INACTIVE":
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
-                break;
-            case "PENDING":
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
-                break;
-            case "DECLINED":
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
-                break;
-            default:
-                postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
-        }
+        Page<Post> postsPage = switch (status) {
+            case "INACTIVE" -> postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
+            case "PENDING" -> postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
+            case "DECLINED" -> postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
+            default -> postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
+        };
 
         List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
@@ -231,21 +217,7 @@ public class PostService {
             postRepository.save(post);
 
             for (String t : createPost.getTags()) {
-                Tag getTag = tagsRepository.getTagByName2(t);
-
-                if (getTag == null) {
-                    Tag tag = new Tag();
-                    tag.setName(t);
-                    Tags2Post tags2Post = new Tags2Post();
-                    tags2Post.setPost(post);
-                    tags2Post.setTag(tagsRepository.save(tag));
-                    tags2PostRepository.save(tags2Post);
-                } else {
-                    Tags2Post tags2Post = new Tags2Post();
-                    tags2Post.setPost(post);
-                    tags2Post.setTag(tagsRepository.save(getTag));
-                    tags2PostRepository.save(tags2Post);
-                }
+                setTagsToPost(post, t);
             }
 
             return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
@@ -254,7 +226,6 @@ public class PostService {
         return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
     }
 
-    //TODO: Удалять только те которых нет в createPost. Ещё время сохранения надо поправить вроде
     public ResponseEntity<?> editPost(int id, Principal principal, CreatePost createPost) {
         Map<String, String> list = new HashMap<>();
 
@@ -309,22 +280,7 @@ public class PostService {
 
         for (String tags : createPost.getTags()) {
             if (!oldTags.containsKey(tags)) {
-
-                Tag getTag = tagsRepository.getTagByName2(tags);
-
-                if (getTag == null) {
-                    Tag tag = new Tag();
-                    tag.setName(tags);
-                    Tags2Post tags2Post = new Tags2Post();
-                    tags2Post.setPost(post);
-                    tags2Post.setTag(tagsRepository.save(tag));
-                    tags2PostRepository.save(tags2Post);
-                } else {
-                    Tags2Post tags2Post = new Tags2Post();
-                    tags2Post.setPost(post);
-                    tags2Post.setTag(tagsRepository.save(getTag));
-                    tags2PostRepository.save(tags2Post);
-                }
+                setTagsToPost(post, tags);
             } else {
                 oldTags.remove(tags);
             }
@@ -424,5 +380,28 @@ public class PostService {
         }
 
         return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
+    }
+
+    private void setTagsToPost(Post post, String t) {
+        Tag getTag = tagsRepository.getTagIdByName(t);
+
+        if (getTag == null) {
+            Tag tag = new Tag();
+            tag.setName(t);
+            Tags2Post tags2Post = new Tags2Post();
+            tags2Post.setPost(post);
+            tags2Post.setTag(tagsRepository.save(tag));
+            tags2PostRepository.save(tags2Post);
+        } else {
+            Tags2Post tags2Post = new Tags2Post();
+            tags2Post.setPost(post);
+            tags2Post.setTag(tagsRepository.save(getTag));
+            tags2PostRepository.save(tags2Post);
+        }
+    }
+
+    private PostsResponse getPosts(Page<Post> postsPages, int size) {
+        List<PostResponseForList> postResponseList = postsPages.get().map(PostResponseForList::new).collect(Collectors.toList());
+        return new PostsResponse(size, postResponseList);
     }
 }

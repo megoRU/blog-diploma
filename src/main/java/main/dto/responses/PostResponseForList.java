@@ -27,16 +27,7 @@ public class PostResponseForList {
     private ArrayList<String> tags;
 
     public PostResponseForList(Post post, List<PostCommentsResponse> comments, List<String> tags) {
-        this.id = post.getId();
-        this.timestamp = post.getTime().toEpochSecond(ZoneOffset.UTC);
-        this.user = new UserPostResponse(post.getUser());
-        this.title = post.getTitle();
-        this.text = post.getText();
-        this.announce = setAnnounce(post);
-        this.likeCount = getLikeCount(post);
-        this.dislikeCount = getDislikeCount(post);
-        this.commentCount = setCommentCount(post);
-        this.viewCount = post.getViewCount();
+        this(post);
         this.comments = new ArrayList<>(comments);
         this.tags = new ArrayList<>(tags);
     }

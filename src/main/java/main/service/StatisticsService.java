@@ -28,6 +28,10 @@ public class StatisticsService {
     public ResponseEntity<?> getMyStatistics() {
         List<Post> postsList = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId());
 
+        return getResponseEntity(postsList);
+    }
+
+    private ResponseEntity<?> getResponseEntity(List<Post> postsList) {
         if (postsList.isEmpty()) {
             return new ResponseEntity<>(new StatisticsResponse(), HttpStatus.OK);
         }
@@ -43,7 +47,6 @@ public class StatisticsService {
             disLikeCount += getDislikeCount(postsList.get(i));
             viewsCount += postsList.get(i).getViewCount();
         }
-
 
         return new ResponseEntity<>(new StatisticsResponse(
                 postsCount,
@@ -65,29 +68,7 @@ public class StatisticsService {
 
         List<Post> postsList = postRepository.findAllPosts();
 
-        if (postsList.isEmpty()) {
-            return new ResponseEntity<>(new StatisticsResponse(), HttpStatus.OK);
-        }
-
-        long postsCount = postsList.size();
-        long likeCount = 0;
-        long disLikeCount = 0;
-        long viewsCount = 0;
-        long firstPublication = postsList.get(0).getTime().toEpochSecond(ZoneOffset.UTC);
-
-
-        for (int i = 0; i < postsList.size(); i++) {
-            likeCount += getLikeCount(postsList.get(i));
-            disLikeCount += getDislikeCount(postsList.get(i));
-            viewsCount += postsList.get(i).getViewCount();
-        }
-
-        return new ResponseEntity<>(new StatisticsResponse(
-                postsCount,
-                likeCount,
-                disLikeCount,
-                viewsCount,
-                firstPublication), HttpStatus.OK);
+        return getResponseEntity(postsList);
     }
 
     private long getLikeCount(Post post) {

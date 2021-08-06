@@ -47,10 +47,9 @@ public class RestoreService {
                     email.get().getEmail(),
                     "DevPub: Запрос на восстановление пароля",
                     "\nВы отправили запрос на восстановление пароля на сайте: " +
-                            "http://" + InetAddress.getLoopbackAddress().getHostAddress() + ":" + mailConfig.getSpringPort() +
-
+                            "https://" + InetAddress.getLoopbackAddress().getHostName() +
                             "\nДля того чтобы задать новый пароль, перейдите по ссылке: \n" +
-                            "http://" + InetAddress.getLoopbackAddress().getHostAddress() + ":" + mailConfig.getSpringPort() +
+                            "https://" + InetAddress.getLoopbackAddress().getHostName() +
                             "/login/change-password/" + uuid.toString().replaceAll("-", "")
 
                             + "\n\nСсылка действительна до " + simpleDateFormat.format(calendar.getTime())
