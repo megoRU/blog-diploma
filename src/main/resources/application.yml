@@ -1,9 +1,9 @@
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://:3306/blog?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true
-    username: blog
-    password:
+    url: process.env.CLEARDB_DATABASE_URL
+    username: process.env.CLEARDB_DATABASE_LOGIN
+    password: process.env.CLEARDB_DATABASE_PASSWORD
 
   servlet:
     multipart:
