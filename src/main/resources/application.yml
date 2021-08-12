@@ -1,9 +1,9 @@
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: ${CLEARDB_DATABASE_URL}
-    username: ${CLEARDB_DATABASE_LOGIN}
-    password: ${CLEARDB_DATABASE_PASSWORD}
+    url: jdbc:mysql://b86e825d36a77c:03e55f27@eu-cdbr-west-01.cleardb.com/heroku_0e9ff4d58e25f1f?reconnect=true
+    username: 03e55f27
+    password: b86e825d36a77c
 
   servlet:
     multipart:
