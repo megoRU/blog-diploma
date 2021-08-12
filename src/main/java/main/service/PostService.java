@@ -45,12 +45,22 @@ public class PostService {
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Post> postsPage = switch (mode) {
-            case "popular" -> postRepository.findAllPostsByCommentsDesc(pageable);
-            case "best" -> postRepository.findAllPostsByVotesDesc(pageable);
-            case "early" -> postRepository.findAllPostsByTime(pageable);
-            default -> postRepository.findAllPostsByTimeDesc(pageable);
-        };
+        Page<Post> postsPage;
+
+        switch (mode) {
+            case "popular":
+                postsPage = postRepository.findAllPostsByCommentsDesc(pageable);
+                break;
+            case "best":
+                postsPage = postRepository.findAllPostsByVotesDesc(pageable);
+                break;
+            case "early":
+                postsPage = postRepository.findAllPostsByTime(pageable);
+                break;
+            default:
+                postsPage = postRepository.findAllPostsByTimeDesc(pageable);
+                break;
+        }
 
         return getPosts(postsPage, postRepository.findAllPosts().size());
     }
@@ -170,12 +180,21 @@ public class PostService {
     public ResponseEntity<?> getMyPosts(int offset, int limit, String status) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
 
-        Page<Post> postsPage = switch (status) {
-            case "INACTIVE" -> postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
-            case "PENDING" -> postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
-            case "DECLINED" -> postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
-            default -> postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
-        };
+        Page<Post> postsPage;
+
+        switch (status) {
+            case "INACTIVE":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, ModerationStatus.ACCEPTED, 0, userService.getCurrentUser().getId(), pageable);
+                break;
+            case "PENDING":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.NEW, 1, userService.getCurrentUser().getId(), pageable);
+                break;
+            case "DECLINED":
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.DECLINED, 1, userService.getCurrentUser().getId(), pageable);
+                break;
+            default:
+                postsPage = postRepository.findAllMyPosts(ModerationStatus.ACCEPTED, 1, userService.getCurrentUser().getId(), pageable);
+        }
 
         List<PostResponseForList> postResponseList = postsPage.get().map(PostResponseForList::new).collect(Collectors.toList());
 
@@ -361,18 +380,17 @@ public class PostService {
         if (post != null) {
             try {
                 switch (postModerationRequest.getDecision()) {
-                    case "accept" -> {
+                    case "accept":
                         post.setModerationStatus(ModerationStatus.ACCEPTED);
                         post.setModeratorId(userService.getCurrentUser().getId());
                         postRepository.save(post);
                         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
-                    }
-                    case "decline" -> {
+
+                    case "decline":
                         post.setModerationStatus(ModerationStatus.DECLINED);
                         post.setModeratorId(userService.getCurrentUser().getId());
                         postRepository.save(post);
                         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
-                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
