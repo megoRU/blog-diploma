@@ -32,7 +32,7 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
     @Query(value = "SELECT * " +
-            "FROM blog.posts p " +
+            "FROM posts p " +
             "WHERE p.is_active = 1 " +
             "  AND p.moderation_status = 'ACCEPTED' " +
             "  AND p.`time` < NOW() " +
