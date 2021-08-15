@@ -1,9 +1,9 @@
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://:3306/blog?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true
-    username: blog
-    password:
+    url: ${JAWSDB_MARIA_URL}
+    username: ${JAWSDB_MARIA_LOGIN}
+    password: ${JAWSDB_MARIA_PASSWORD}
 
   servlet:
     multipart:
