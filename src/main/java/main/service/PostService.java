@@ -14,11 +14,13 @@ import main.model.enums.ModerationStatus;
 import main.repositories.*;
 import main.security.UserService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.Instant;
@@ -28,8 +30,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.toIntExact;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostService {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -44,7 +49,6 @@ public class PostService {
 
     public PostsResponse getPosts(int offset, int limit, String mode) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
-
         Page<Post> postsPage;
 
         switch (mode) {
@@ -52,8 +56,17 @@ public class PostService {
                 postsPage = postRepository.findAllPostsByCommentsDesc(pageable);
                 break;
             case "best":
-                postsPage = postRepository.findAllPostsByVotesDesc(pageable);
-                break;
+                postsPage = new PageImpl<>(postRepository.findAllPostsByVotesDesc(), pageable, postRepository.findAllPostsByVotesDesc().size());
+                int total = Integer.parseInt(String.valueOf(postsPage.get().count()));
+                int start = toIntExact(pageable.getOffset());
+                int end = Math.min((start + pageable.getPageSize()), total);
+                List<Post> output = new ArrayList<>();
+
+                if (start <= end) {
+                    output = postRepository.findAllPostsByVotesDesc().subList(start, end);
+                }
+
+                return getPosts(output, postRepository.findAllPosts().size());
             case "early":
                 postsPage = postRepository.findAllPostsByTime(pageable);
                 break;
@@ -62,14 +75,14 @@ public class PostService {
                 break;
         }
 
-        return getPosts(postsPage, postRepository.findAllPosts().size());
+        return getPosts(postsPage.toList(), postRepository.findAllPosts().size());
     }
 
     public PostsResponse getPostsSearch(int offset, int limit, String query) {
         if (query.trim().equals("")) {
             Pageable pageable = PageRequest.of(offset / limit, limit);
             Page<Post> postsPage = postRepository.findAllPostsByTimeDesc(pageable);
-            return getPosts(postsPage, postRepository.findAllPosts().size());
+            return getPosts(postsPage.toList(), postRepository.findAllPosts().size());
         }
 
         Pageable pageable = PageRequest.of(offset / limit, limit);
@@ -418,8 +431,8 @@ public class PostService {
         }
     }
 
-    private PostsResponse getPosts(Page<Post> postsPages, int size) {
-        List<PostResponseForList> postResponseList = postsPages.get().map(PostResponseForList::new).collect(Collectors.toList());
+    private PostsResponse getPosts(List<Post> postsPages, int size) {
+        List<PostResponseForList> postResponseList = postsPages.stream().map(PostResponseForList::new).collect(Collectors.toList());
         return new PostsResponse(size, postResponseList);
     }
 }

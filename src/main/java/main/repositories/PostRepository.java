@@ -31,21 +31,14 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
             "AND p.time < CURRENT_TIME ORDER BY SIZE(p.comment) DESC")
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
-    @Query(value = "SELECT * " +
-            "FROM posts p " +
-            "WHERE p.is_active = 1 " +
-            "  AND p.moderation_status = 'ACCEPTED' " +
-            "  AND p.`time` < NOW() " +
-            "ORDER BY (SELECT sum(value) FROM post_votes c WHERE c.post_id = p.id) DESC ", nativeQuery = true)
-    Page<Post> findAllPostsByVotesDesc(Pageable pageable);
-
-//    @Query(value = "SELECT DISTINCT p FROM Post p " +
-//            "LEFT JOIN PostVote pv ON pv.post.id = p.id " +
-//            "WHERE p.isActive = 1 " +
-//            "AND p.moderationStatus = 'ACCEPTED' " +
-//            "AND p.time < CURRENT_TIME " +
-//            "ORDER BY pv.value DESC ")
-//    Page<Post> findAllPostsByVotesDesc(Pageable pageable);
+    @Modifying
+    @Query(value = "SELECT DISTINCT p, " +
+            "(SELECT DISTINCT COUNT(pv) AS countLikes FROM PostVote pv WHERE pv.post.id = p.id) " +
+            "AS countLikes " +
+            "FROM Post p " +
+            "LEFT JOIN PostVote pv ON pv.post.id = p.id WHERE p.isActive = 1 " +
+            "AND p.moderationStatus = 'ACCEPTED' AND p.time < CURRENT_TIME ORDER BY countLikes DESC ")
+    List<Post> findAllPostsByVotesDesc();
 
     @Query(value = "SELECT p FROM Post p WHERE p.isActive = 1 " +
             "AND p.moderationStatus = 'ACCEPTED' " +
