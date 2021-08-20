@@ -47,6 +47,21 @@ public class Post {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
+    @Transient
+    private Long postCount;
+
+    @Transient
+    private Long countLikes;
+
+    @Transient
+    private Long countDislikes;
+
+    @Transient
+    private Long sumView;
+
+    @Transient
+    LocalDateTime firstPost;
+
     @OneToMany(mappedBy = "post")
     private List<Tags2Post> tag;
 
@@ -55,4 +70,22 @@ public class Post {
 
     @OneToMany(mappedBy = "post")
     private List<PostComment> comment;
+
+    public Post(Long postCount, Long countLikes, Long countDislikes, LocalDateTime firstPost) {
+        this.postCount = postCount == null ? 0 : postCount;
+        this.countLikes = countLikes == null ? 0 :countLikes;
+        this.countDislikes = countDislikes == null ? 0 :countDislikes;
+        this.firstPost = firstPost;
+    }
+
+    public Post(Long sumView, Long postCount, LocalDateTime firstPost) {
+        this.sumView = sumView == null ? 0 : sumView;
+        this.postCount = postCount == null ? 0 : postCount;
+        this.firstPost = firstPost;
+    }
+
+    public Post(Long sumView, Long postCount) {
+        this.sumView = sumView == null ? 0 : sumView;
+        this.postCount = postCount == null ? 0 : postCount;
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends CrudRepository<Post, Integer> {
@@ -30,6 +31,48 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
             "AND p.moderationStatus = 'ACCEPTED' " +
             "AND p.time < CURRENT_TIME ORDER BY SIZE(p.comment) DESC")
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
+
+
+//    @Query(value = "SELECT DISTINCT COUNT(p.id)           AS postCount, " +
+//            "                SUM(CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
+//            "                SUM(CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
+//            "                SUM(DISTINCT p.viewCount)    AS sumView, " +
+//            "                MIN(DISTINCT p.time)         AS firstPost " +
+//            "FROM Post p  " +
+//            "JOIN PostVote pv on p.id = pv.post.id " +
+//            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
+//    Post findAllPostForGlobalStatistic(); //не сработает
+
+    @Query(value = "SELECT DISTINCT new main.model.Post(" +
+            "SUM(p.viewCount) AS sumView, " +
+            "COUNT(p.id) AS postCount, " +
+            "MIN(p.time) AS firstPost) " +
+            "FROM Post p " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.user.id = :userId ")
+    Post getMyPostSumViewFromPosts(@Param("userId") Integer userId);
+
+    @Query(value = "SELECT DISTINCT new main.model.Post(COUNT(p.id) AS postCount, " +
+            "                SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
+            "                SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
+            "                MIN (p.time) AS firstPost) " +
+            "FROM Post p " +
+            "JOIN PostVote pv on p.id = pv.post.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND pv.user.id = :userId")
+    Post findMyAllPostForGlobalStatistic(@Param("userId") Integer userId);
+
+    @Query(value = "SELECT DISTINCT new main.model.Post(SUM(p.viewCount) AS sumView, COUNT(p.id) AS postCount) " +
+            "FROM Post p " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
+    Post getPostSumViewFromPosts();
+
+    @Query(value = "SELECT DISTINCT new main.model.Post(COUNT(p.id) AS postCount, " +
+            "                SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
+            "                SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
+            "                MIN (p.time) AS firstPost) " +
+            "FROM Post p " +
+            "JOIN PostVote pv on p.id = pv.post.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
+    Post findAllPostForGlobalStatistic();
 
     @Modifying
     @Query(value = "SELECT DISTINCT p, " +

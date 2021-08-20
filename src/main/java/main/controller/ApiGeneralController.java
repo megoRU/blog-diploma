@@ -6,6 +6,8 @@ import main.dto.request.SettingsRequest;
 import main.dto.responses.CalendarResponseList;
 import main.dto.responses.InitResponse;
 import main.dto.responses.SettingsResponse;
+import main.repositories.GlobalSettingsRepository;
+import main.security.UserService;
 import main.service.CalendarService;
 import main.service.ImageService;
 import main.service.SettingsService;
@@ -26,6 +28,8 @@ public class ApiGeneralController {
     private final CalendarService calendarService;
     private final StatisticsService statisticsService;
     private final ImageService imageService;
+    private final UserService userService;
+    private final GlobalSettingsRepository globalSettingsRepository;
 
     @GetMapping(value = "/api/settings")
     private ResponseEntity<SettingsResponse> settings() {
@@ -65,7 +69,16 @@ public class ApiGeneralController {
 
     @GetMapping(value = "/api/statistics/all")
     private ResponseEntity<?> getAllStatistics(Principal principal) {
-        return statisticsService.getAllStatistics(principal);
+        if (globalSettingsRepository.getSettingsById("STATISTICS_IS_PUBLIC").getValue().equals("NO") && principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        if (globalSettingsRepository.getSettingsById("STATISTICS_IS_PUBLIC").getValue().equals("NO")
+                && userService.getCurrentUser().getIsModerator() == 0) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        return statisticsService.getAllStatistics();
     }
 
     @PostMapping(value = "/api/profile/my", consumes = {"multipart/form-data"})
