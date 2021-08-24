@@ -1,5 +1,6 @@
 package main.repositories;
 
+import main.dto.responses.StatisticsResponse;
 import main.model.Post;
 import main.model.enums.ModerationStatus;
 import org.springframework.data.domain.Page;
@@ -9,11 +10,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PostRepository extends CrudRepository<Post, Integer> {
@@ -32,24 +32,17 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
             "AND p.time < CURRENT_TIME ORDER BY SIZE(p.comment) DESC")
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
-
-//    @Query(value = "SELECT DISTINCT COUNT(p.id)           AS postCount, " +
-//            "                SUM(CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
-//            "                SUM(CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
-//            "                SUM(DISTINCT p.viewCount)    AS sumView, " +
-//            "                MIN(DISTINCT p.time)         AS firstPost " +
-//            "FROM Post p  " +
-//            "JOIN PostVote pv on p.id = pv.post.id " +
-//            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
-//    Post findAllPostForGlobalStatistic(); //не сработает
-
-    @Query(value = "SELECT DISTINCT new main.model.Post(" +
-            "SUM(p.viewCount) AS sumView, " +
+    //GROUP BY don`t work
+    @Query(value = "SELECT new main.dto.responses.StatisticsResponse(" +
             "COUNT(p.id) AS postCount, " +
-            "MIN(p.time) AS firstPost) " +
+            "SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
+            "SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
+            "SUM(p.viewCount) AS sumView, " +
+            "MIN(p.time) AS firstPublication) " +
             "FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.user.id = :userId ")
-    Post getMyPostSumViewFromPosts(@Param("userId") Integer userId);
+            "LEFT JOIN PostVote pv on p.id = pv.post.id " +
+            "WHERE p.user.id = :userId AND p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' GROUP BY p.id")
+    StatisticsResponse getMyPostSumViewFromPosts(@Param("userId") Integer userId);
 
     @Query(value = "SELECT DISTINCT new main.model.Post(COUNT(p.id) AS postCount, " +
             "                SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
@@ -155,31 +148,5 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
 
     @Query(value = "SELECT COUNT(p) FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'NEW'")
     int findCountAllPostsForModerator(@Param("email") String email);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE Post p SET " +
-            "p.text = :text, " +
-            "p.title = :title, " +
-            "p.isActive = :active, " +
-            "p.time = :time, " +
-            "p.moderationStatus = :status, " +
-            "p.moderatorId = :moderatorId WHERE p.id = :id")
-    void updatePost(@Param("id") Integer id,
-                    @Param("title") String title,
-                    @Param("text") String text,
-                    @Param("active") Integer active,
-                    @Param("time") LocalDateTime time,
-                    @Param("status") ModerationStatus status,
-                    @Param("moderatorId") Integer moderatorId);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE Post p SET p.text = :text, p.title = :title, p.isActive = :active, p.time = :time WHERE p.id = :id")
-    void updatePostForModerator(@Param("id") Integer id,
-                                @Param("title") String title,
-                                @Param("text") String text,
-                                @Param("active") Integer active,
-                                @Param("time") LocalDateTime time);
 
 }

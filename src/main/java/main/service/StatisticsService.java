@@ -18,17 +18,14 @@ public class StatisticsService {
     private final PostRepository postRepository;
     private final UserService userService;
 
-    public ResponseEntity<?> getMyStatistics() {
+    public ResponseEntity<StatisticsResponse> getMyStatistics() {
 
-        Post allStatistics = postRepository.findMyAllPostForGlobalStatistic(userService.getCurrentUser().getId());
-        Post sumView = postRepository.getMyPostSumViewFromPosts(userService.getCurrentUser().getId());
+//        StatisticsResponse statisticsResponse = new StatisticsResponse(postRepository.getMyPostSumViewFromPosts(userService.getCurrentUser().getId()));
+//
+//        System.out.println(postRepository.getMyPostSumViewFromPosts(userService.getCurrentUser().getId()).size());
 
-        return new ResponseEntity<>(new StatisticsResponse(
-                sumView.getPostCount(),
-                allStatistics.getCountLikes(),
-                allStatistics.getCountDislikes(),
-                sumView.getSumView(),
-                sumView.getFirstPost().toEpochSecond(ZoneOffset.UTC)), HttpStatus.OK);
+//        return null;
+        return new ResponseEntity<>(postRepository.getMyPostSumViewFromPosts(userService.getCurrentUser().getId()), HttpStatus.OK);
     }
 
     public ResponseEntity<?> getAllStatistics() {
@@ -42,6 +39,6 @@ public class StatisticsService {
                 allStatistics.getCountDislikes(),
                 sumView.getSumView(),
                 allStatistics.getFirstPost().toEpochSecond(ZoneOffset.UTC)), HttpStatus.OK);
-    }
 
+    }
 }

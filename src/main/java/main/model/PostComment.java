@@ -1,5 +1,6 @@
 package main.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,4 +36,13 @@ public class PostComment {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
+
+    public PostComment(Post post, User user, Integer parentId, String text, LocalDateTime time) {
+        this.parentId = parentId;
+        this.post = post;
+        this.user = user;
+        this.time = time;
+        this.text = text;
+    }
+
 }

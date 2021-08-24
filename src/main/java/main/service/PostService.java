@@ -292,15 +292,30 @@ public class PostService {
 
         if (userService.getCurrentUser().getIsModerator() == 0
                 && globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")) {
-            postRepository.updatePost(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
-                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC), ModerationStatus.NEW, null);
+            post.setTitle(createPost.getTitle());
+            post.setText(createPost.getText());
+            post.setIsActive(createPost.getActive());
+            post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+            post.setModerationStatus(ModerationStatus.NEW);
+            post.setModeratorId(null);
+            postRepository.save(post);
+
         } else if (userService.getCurrentUser().getIsModerator() == 0
                 && globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO")) {
-            postRepository.updatePost(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
-                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC), ModerationStatus.ACCEPTED, null);
+            post.setTitle(createPost.getTitle());
+            post.setText(createPost.getText());
+            post.setIsActive(createPost.getActive());
+            post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+            post.setModerationStatus(ModerationStatus.ACCEPTED);
+            post.setModeratorId(null);
+            postRepository.save(post);
+
         } else {
-            postRepository.updatePostForModerator(id, createPost.getTitle(), createPost.getText(), createPost.getActive(),
-                    LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+            post.setTitle(createPost.getTitle());
+            post.setText(createPost.getText());
+            post.setIsActive(createPost.getActive());
+            post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+            postRepository.save(post);
         }
 
         List<Tags2Post> tags2Posts = tags2PostRepository.getTags2Posts(id);
@@ -373,12 +388,9 @@ public class PostService {
             return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.BAD_REQUEST);
         }
 
-        PostComment postComment = new PostComment();
-        postComment.setPost(post);
-        postComment.setUser(userService.getCurrentUser());
-        postComment.setParentId(commentRequest.getParentId());
-        postComment.setText(commentRequest.getText());
-        postComment.setTime(LocalDateTime.ofEpochSecond(Instant.now().getEpochSecond(), 0, ZoneOffset.UTC));
+        PostComment postComment = new PostComment(post, userService.getCurrentUser(), commentRequest.getParentId(),
+                commentRequest.getText(), LocalDateTime.ofEpochSecond(Instant.now().getEpochSecond(), 0, ZoneOffset.UTC));
+
         commentsRepository.save(postComment);
 
         return new ResponseEntity<>(new CommentResponse(postComment.getId()), HttpStatus.OK);
@@ -394,16 +406,10 @@ public class PostService {
             try {
                 switch (postModerationRequest.getDecision()) {
                     case "accept":
-                        post.setModerationStatus(ModerationStatus.ACCEPTED);
-                        post.setModeratorId(userService.getCurrentUser().getId());
-                        postRepository.save(post);
-                        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+                        return getResponse(post, ModerationStatus.ACCEPTED);
 
                     case "decline":
-                        post.setModerationStatus(ModerationStatus.DECLINED);
-                        post.setModeratorId(userService.getCurrentUser().getId());
-                        postRepository.save(post);
-                        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+                        return getResponse(post, ModerationStatus.DECLINED);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -411,6 +417,13 @@ public class PostService {
         }
 
         return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
+    }
+
+    private ResponseEntity<?> getResponse(Post post, ModerationStatus moderationStatus) {
+        post.setModerationStatus(moderationStatus);
+        post.setModeratorId(userService.getCurrentUser().getId());
+        postRepository.save(post);
+        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
 
     private void setTagsToPost(Post post, String t) {
