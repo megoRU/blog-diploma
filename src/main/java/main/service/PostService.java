@@ -400,23 +400,19 @@ public class PostService {
         if (userService.getCurrentUser().getIsModerator() == 0) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+
         Post post = postRepository.findPostByIdForModerator(postModerationRequest.getPostId());
 
-        if (post != null) {
-            try {
-                switch (postModerationRequest.getDecision()) {
-                    case "accept":
-                        return getResponse(post, ModerationStatus.ACCEPTED);
-
-                    case "decline":
-                        return getResponse(post, ModerationStatus.DECLINED);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (post == null) {
+            return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
+        if (postModerationRequest.getDecision().equals("accept")) {
+            return getResponse(post, ModerationStatus.ACCEPTED);
+        } else {
+            return getResponse(post, ModerationStatus.DECLINED);
+        }
+
     }
 
     private ResponseEntity<?> getResponse(Post post, ModerationStatus moderationStatus) {
