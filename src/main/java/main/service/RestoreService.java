@@ -1,7 +1,6 @@
 package main.service;
 
 import lombok.AllArgsConstructor;
-import main.config.MailConfig;
 import main.dto.enums.EnumResponse;
 import main.dto.enums.RegistrationErrors;
 import main.dto.request.PasswordRestoreRequest;
@@ -28,7 +27,6 @@ public class RestoreService {
     private final UserRepository userRepository;
     private final CaptchaRepository captchaRepository;
     private final MailSender mailSender;
-    private final MailConfig mailConfig;
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("d MMMM yyyy, HH:mm");
     private final Calendar calendar = Calendar.getInstance();
 
@@ -66,6 +64,21 @@ public class RestoreService {
         User userCode = userRepository.findUserCode(passwordRestoreRequest.getCode());
         Map<String, String> list = new HashMap<>();
 
+        extracted(passwordRestoreRequest, userCode, list);
+
+        if (list.isEmpty()) {
+
+            userRepository.updatePasswordAndDeleteCode(
+                    new BCryptPasswordEncoder(12).encode(passwordRestoreRequest.getPassword()),
+                    userCode.getId());
+
+            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+    }
+
+    private void extracted(PasswordRestoreRequest passwordRestoreRequest, User userCode, Map<String, String> list) {
         if (passwordRestoreRequest.getPassword().length() < 6) {
             list.put(EnumResponse.password.name(), RegistrationErrors.PASSWORD.getErrors());
         }
@@ -81,16 +94,5 @@ public class RestoreService {
         if (!passwordRestoreRequest.getCaptcha().equals(captchaRepository.checkCaptcha(passwordRestoreRequest.getCaptcha_secret()))) {
             list.put(EnumResponse.captcha.name(), RegistrationErrors.CAPTCHA.getErrors());
         }
-
-        if (list.isEmpty()) {
-
-            userRepository.updatePasswordAndDeleteCode(
-                    new BCryptPasswordEncoder(12).encode(passwordRestoreRequest.getPassword()),
-                    userCode.getId());
-
-            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
     }
 }

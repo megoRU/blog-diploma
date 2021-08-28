@@ -29,6 +29,22 @@ public class RegistrationService {
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         Map<String, String> list = new HashMap<>();
 
+        extracted(registrationRequest, list);
+
+        if (list.isEmpty()) {
+            User user = new User();
+            user.setEmail(registrationRequest.getEmail());
+            user.setName(registrationRequest.getName());
+            user.setRegTime(LocalDateTime.now());
+            user.setPassword(new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()));
+            userRepository.save(user);
+            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
+    }
+
+    private void extracted(RegistrationRequest registrationRequest, Map<String, String> list) {
         if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
             list.put(EnumResponse.email.name(), RegistrationErrors.EMAIL.getErrors());
         }
@@ -44,18 +60,6 @@ public class RegistrationService {
         if (!registrationRequest.getCaptcha().equals(captchaRepository.checkCaptcha(registrationRequest.getCaptcha_secret()))) {
             list.put(EnumResponse.captcha.name(), RegistrationErrors.CAPTCHA.getErrors());
         }
-
-        if (list.isEmpty()) {
-            User user = new User();
-            user.setEmail(registrationRequest.getEmail());
-            user.setName(registrationRequest.getName());
-            user.setRegTime(LocalDateTime.now());
-            user.setPassword(new BCryptPasswordEncoder(12).encode(registrationRequest.getPassword()));
-            userRepository.save(user);
-            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(new CreateResponse(false, list), HttpStatus.OK);
     }
 
 }

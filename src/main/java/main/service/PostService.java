@@ -290,31 +290,25 @@ public class PostService {
             datePost = dateNow;
         }
 
+        post.setTitle(createPost.getTitle());
+        post.setText(createPost.getText());
+        post.setIsActive(createPost.getActive());
+        post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+
         if (userService.getCurrentUser().getIsModerator() == 0
                 && globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")) {
-            post.setTitle(createPost.getTitle());
-            post.setText(createPost.getText());
-            post.setIsActive(createPost.getActive());
-            post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
+
             post.setModerationStatus(ModerationStatus.NEW);
             post.setModeratorId(null);
             postRepository.save(post);
 
         } else if (userService.getCurrentUser().getIsModerator() == 0
                 && globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO")) {
-            post.setTitle(createPost.getTitle());
-            post.setText(createPost.getText());
-            post.setIsActive(createPost.getActive());
-            post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
             post.setModerationStatus(ModerationStatus.ACCEPTED);
             post.setModeratorId(null);
             postRepository.save(post);
 
         } else {
-            post.setTitle(createPost.getTitle());
-            post.setText(createPost.getText());
-            post.setIsActive(createPost.getActive());
-            post.setTime(LocalDateTime.ofEpochSecond(datePost.getTime() / 1000, 0, ZoneOffset.UTC));
             postRepository.save(post);
         }
 
@@ -424,20 +418,17 @@ public class PostService {
 
     private void setTagsToPost(Post post, String t) {
         Tag getTag = tagsRepository.getTagIdByName(t);
+        Tags2Post tags2Post = new Tags2Post();
+        tags2Post.setPost(post);
 
         if (getTag == null) {
             Tag tag = new Tag();
             tag.setName(t);
-            Tags2Post tags2Post = new Tags2Post();
-            tags2Post.setPost(post);
             tags2Post.setTag(tagsRepository.save(tag));
-            tags2PostRepository.save(tags2Post);
         } else {
-            Tags2Post tags2Post = new Tags2Post();
-            tags2Post.setPost(post);
             tags2Post.setTag(tagsRepository.save(getTag));
-            tags2PostRepository.save(tags2Post);
         }
+        tags2PostRepository.save(tags2Post);
     }
 
     private PostsResponse getPosts(List<Post> postsPages, int size) {
