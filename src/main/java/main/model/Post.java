@@ -78,12 +78,6 @@ public class Post {
         this.firstPost = firstPost;
     }
 
-    public Post(Long sumView, Long postCount, LocalDateTime firstPost) {
-        this.sumView = sumView == null ? 0 : sumView;
-        this.postCount = postCount == null ? 0 : postCount;
-        this.firstPost = firstPost;
-    }
-
     public Post(Long sumView, Long postCount) {
         this.sumView = sumView == null ? 0 : sumView;
         this.postCount = postCount == null ? 0 : postCount;

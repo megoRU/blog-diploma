@@ -33,27 +33,19 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
     //GROUP BY don`t work
-    @Query(value = "SELECT new main.dto.responses.StatisticsResponse(" +
+    @Query(value = "SELECT DISTINCT new main.dto.responses.StatisticsResponse(" +
             "COUNT(p.id) AS postCount, " +
             "SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
             "SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
             "SUM(p.viewCount) AS sumView, " +
             "MIN(p.time) AS firstPublication) " +
             "FROM Post p " +
-            "LEFT JOIN PostVote pv on p.id = pv.post.id " +
-            "WHERE p.user.id = :userId AND p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' GROUP BY p.id")
+            "JOIN PostVote pv on p.id = pv.post.id " +
+            "WHERE p.user.id = :userId AND p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
     StatisticsResponse getMyPostSumViewFromPosts(@Param("userId") Integer userId);
 
-    @Query(value = "SELECT DISTINCT new main.model.Post(COUNT(p.id) AS postCount, " +
-            "                SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
-            "                SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
-            "                MIN (p.time) AS firstPost) " +
-            "FROM Post p " +
-            "JOIN PostVote pv on p.id = pv.post.id " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND pv.user.id = :userId")
-    Post findMyAllPostForGlobalStatistic(@Param("userId") Integer userId);
-
-    @Query(value = "SELECT DISTINCT new main.model.Post(SUM(p.viewCount) AS sumView, COUNT(p.id) AS postCount) " +
+    @Query(value = "SELECT DISTINCT new main.model.Post(SUM(p.viewCount) AS sumView, " +
+            "COUNT(p.id) AS postCount) " +
             "FROM Post p " +
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
     Post getPostSumViewFromPosts();
