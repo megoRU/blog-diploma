@@ -33,7 +33,7 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
     //GROUP BY don`t work
-    @Query(value = "SELECT DISTINCT new main.dto.responses.StatisticsResponse(" +
+    @Query(value = "SELECT new main.dto.responses.StatisticsResponse(" +
             "COUNT(p.id) AS postCount, " +
             "SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
             "SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
@@ -50,7 +50,7 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
     Post getPostSumViewFromPosts();
 
-    @Query(value = "SELECT DISTINCT new main.model.Post(COUNT(p.id) AS postCount, " +
+    @Query(value = "SELECT new main.model.Post(COUNT(p.id) AS postCount, " +
             "                SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
             "                SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
             "                MIN (p.time) AS firstPost) " +

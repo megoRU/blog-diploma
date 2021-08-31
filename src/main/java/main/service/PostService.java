@@ -235,17 +235,18 @@ public class PostService {
             post.setTitle(createPost.getTitle());
             post.setText(createPost.getText());
 
-            if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES") && user.getIsModerator() == 0) {
-                post.setModerationStatus(ModerationStatus.NEW);
-            } else if (user.getIsModerator() == 1 && createPost.getActive() == 1) {
-                post.setModerationStatus(ModerationStatus.ACCEPTED);
-            } else if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("NO") && createPost.getActive() == 1) {
-                post.setModerationStatus(ModerationStatus.ACCEPTED);
+            if (userService.getCurrentUser().getIsModerator() == 0) {
+                if (globalSettingsRepository.getSettingsById("POST_PREMODERATION").getValue().equals("YES")) {
+                    post.setModerationStatus(ModerationStatus.ACCEPTED);
+                } else { //т.к. третьего варианта нет
+                    post.setModerationStatus(ModerationStatus.NEW);
+                }
+                post.setModeratorId(null);
             } else {
-                post.setModerationStatus(ModerationStatus.NEW);
+                //TODO может id модератора указать
+                post.setModerationStatus(ModerationStatus.ACCEPTED);
             }
 
-            post.setModeratorId(null);
             postRepository.save(post);
 
             for (String t : createPost.getTags()) {
@@ -334,6 +335,11 @@ public class PostService {
         return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
     }
 
+    private ResponseEntity<?> saveReaction(PostVote postVote) {
+        postVoteRepository.save(postVote);
+        return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+    }
+
     public ResponseEntity<?> reactionToPost(ReactionRequest reactionRequest, ReactionsForPost reactionsForPost) {
         PostVote postVote = postVoteRepository.getPostVoteByIdAndByUserId(reactionRequest.getPostId(), userService.getCurrentUser().getId());
 
@@ -349,23 +355,21 @@ public class PostService {
             } else {
                 postVote.setValue(-1);
             }
-            postVoteRepository.save(postVote);
-            return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+            return saveReaction(postVote);
         }
 
         if (reactionsForPost.equals(ReactionsForPost.LIKE)) {
             if (postVote.getValue() != 1) {
                 postVote.setValue(1);
-                postVoteRepository.save(postVote);
-                return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+                return saveReaction(postVote);
             }
         } else {
             if (postVote.getValue() != -1) {
                 postVote.setValue(-1);
-                postVoteRepository.save(postVote);
-                return new ResponseEntity<>(new ResultResponse(true), HttpStatus.OK);
+                return saveReaction(postVote);
             }
         }
+
         return new ResponseEntity<>(new ResultResponse(false), HttpStatus.OK);
     }
 
