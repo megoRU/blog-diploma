@@ -6,6 +6,7 @@ import main.dto.request.SettingsRequest;
 import main.dto.responses.CalendarResponseList;
 import main.dto.responses.InitResponse;
 import main.dto.responses.SettingsResponse;
+import main.dto.responses.StatisticsResponse;
 import main.repositories.GlobalSettingsRepository;
 import main.security.UserService;
 import main.service.CalendarService;
@@ -60,7 +61,7 @@ public class ApiGeneralController {
     }
 
     @GetMapping(value = "/api/statistics/my")
-    private ResponseEntity<?> getMyStatistics(Principal principal) {
+    private ResponseEntity<StatisticsResponse> getMyStatistics(Principal principal) {
         if (principal == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -68,7 +69,7 @@ public class ApiGeneralController {
     }
 
     @GetMapping(value = "/api/statistics/all")
-    private ResponseEntity<?> getAllStatistics(Principal principal) {
+    private ResponseEntity<StatisticsResponse> getAllStatistics(Principal principal) {
         if (globalSettingsRepository.getSettingsById("STATISTICS_IS_PUBLIC").getValue().equals("NO") && principal == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

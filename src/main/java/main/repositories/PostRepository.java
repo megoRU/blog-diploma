@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,32 +31,27 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
             "AND p.time < CURRENT_TIME ORDER BY SIZE(p.comment) DESC")
     Page<Post> findAllPostsByCommentsDesc(Pageable pageable);
 
-    //GROUP BY don`t work
     @Query(value = "SELECT new main.dto.responses.StatisticsResponse(" +
-            "COUNT(p.id) AS postCount, " +
+            "(SELECT COUNT(p.id) FROM Post p WHERE p.user.id = :userId AND p.isActive = 1 AND p.moderationStatus = 'ACCEPTED') AS postCount, " +
             "SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
             "SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
-            "SUM(p.viewCount) AS sumView, " +
+            "(SELECT SUM(p.viewCount) FROM Post p WHERE p.user.id = :userId AND p.isActive = 1 AND p.moderationStatus = 'ACCEPTED') AS sumView, " +
             "MIN(p.time) AS firstPublication) " +
             "FROM Post p " +
             "JOIN PostVote pv on p.id = pv.post.id " +
             "WHERE p.user.id = :userId AND p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
     StatisticsResponse getMyPostSumViewFromPosts(@Param("userId") Integer userId);
 
-    @Query(value = "SELECT DISTINCT new main.model.Post(SUM(p.viewCount) AS sumView, " +
-            "COUNT(p.id) AS postCount) " +
-            "FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
-    Post getPostSumViewFromPosts();
-
-    @Query(value = "SELECT new main.model.Post(COUNT(p.id) AS postCount, " +
-            "                SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
-            "                SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
-            "                MIN (p.time) AS firstPost) " +
+    @Query(value = "SELECT new main.dto.responses.StatisticsResponse(" +
+            "(SELECT COUNT(p.id) FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED') AS postCount, " +
+            "SUM (CASE WHEN pv.value = 1 THEN 1 ELSE 0 END)  AS countLikes, " +
+            "SUM (CASE WHEN pv.value = -1 THEN 1 ELSE 0 END) AS countDislikes, " +
+            "(SELECT SUM(p.viewCount) FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED') AS sumView, " +
+            "MIN(p.time) AS firstPublication) " +
             "FROM Post p " +
             "JOIN PostVote pv on p.id = pv.post.id " +
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ")
-    Post findAllPostForGlobalStatistic();
+    StatisticsResponse getAllPostSumViewFromPosts();
 
     @Modifying
     @Query(value = "SELECT DISTINCT p, " +
