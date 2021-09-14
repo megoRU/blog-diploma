@@ -45,9 +45,9 @@ public class RestoreService {
                     email.get().getEmail(),
                     "DevPub: Запрос на восстановление пароля",
                     "\nВы отправили запрос на восстановление пароля на сайте: " +
-                            "https://" + InetAddress.getLoopbackAddress().getHostAddress() +
+                            "https://app-skillbox-diplom.herokuapp.com" +
                             "\nДля того чтобы задать новый пароль, перейдите по ссылке: \n" +
-                            "https://" + InetAddress.getLoopbackAddress().getHostAddress() +
+                            "https://app-skillbox-diplom.herokuapp.com" +
                             "/login/change-password/" + uuid.toString().replaceAll("-", "")
 
                             + "\n\nСсылка действительна до " + simpleDateFormat.format(calendar.getTime())
